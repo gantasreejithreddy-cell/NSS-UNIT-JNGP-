@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSS Unit JNGP - Polytechnic College Ramanthapur</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+        .nss-gradient { background: linear-gradient(135deg, #0A192F 0%, #1E3A8A 50%, #2563EB 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 relative">
+
+    <!-- 3D Particle Canvas Background -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- App Container -->
+    <div id="app" class="relative z-10 max-w-md mx-auto min-h-screen bg-slate-50 shadow-2xl flex flex-col overflow-hidden">
+        
+        <!-- ==================== LANDING / WELCOME VIEW ==================== -->
+        <div id="view-landing" class="flex flex-col min-h-screen p-6 justify-between nss-gradient text-white">
+            <div class="text-center pt-6 space-y-4">
+                <div class="flex justify-center items-center gap-4 animate-bounce">
+                    <!-- NSS Emblem (1829.jpg) -->
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" alt="NSS Emblem" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover">
+                    <!-- JNGP Crest (1831.jpg) -->
+                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150" alt="JNGP Crest" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover">
+                </div>
+                <h1 class="text-2xl font-bold tracking-wide">NSS UNIT JNGP</h1>
+                <p class="text-xs text-blue-200">Govt Polytechnic College, Ramanthapur</p>
+                <div class="inline-block bg-white/20 px-3 py-1 rounded-full text-xs font-medium tracking-widest uppercase">
+                    "Not Me, But You"
+                </div>
+            </div>
+
+            <!-- Third-Party Collaborations Section -->
+            <div class="my-6 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                <p class="text-center text-xs uppercase tracking-wider text-blue-200 mb-3 font-semibold"><i class="fa-solid fa-handshake mr-1"></i> Official Collaborators & Partners</p>
+                <div class="flex justify-around items-center gap-2">
+                    <div class="bg-white/20 px-3 py-2 rounded-xl text-center flex-1">
+                        <i class="fa-solid fa-seedling text-emerald-400 text-lg mb-1"></i>
+                        <p class="text-[10px] font-medium">EcoGreen Corp</p>
+                    </div>
+                    <div class="bg-white/20 px-3 py-2 rounded-xl text-center flex-1">
+                        <i class="fa-solid fa-laptop-code text-cyan-400 text-lg mb-1"></i>
+                        <p class="text-[10px] font-medium">TechNova Labs</p>
+                    </div>
+                    <div class="bg-white/20 px-3 py-2 rounded-xl text-center flex-1">
+                        <i class="fa-solid fa-heart-pulse text-rose-400 text-lg mb-1"></i>
+                        <p class="text-[10px] font-medium">YouthCare NGO</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign In Options -->
+            <div class="space-y-3 pb-6">
+                <button onclick="openSignInModal('board')" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-blue-400">
+                    <i class="fa-solid fa-user-shield text-lg"></i> Board Member Sign In
+                </button>
+                <button onclick="openSignInModal('student')" class="w-full bg-white/10 hover:bg-white/20 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-white/30">
+                    <i class="fa-solid fa-user-graduate text-lg"></i> Student Sign In / Register
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== MAIN APP DASHBOARD (HIDDEN INITIALLY) ==================== -->
+        <div id="view-dashboard" class="hidden flex-col flex-1 pb-20">
+            <!-- Header -->
+            <div class="nss-gradient text-white p-4 rounded-b-3xl shadow-md">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" class="w-10 h-10 rounded-full border border-white">
+                        <div>
+                            <h2 class="font-bold text-sm">NSS Unit JNGP</h2>
+                            <p class="text-[10px] text-blue-200" id="user-role-badge">Role: Guest</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition">
+                        <i class="fa-solid fa-power-off"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="tab-content" class="p-4 flex-1 space-y-4">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 flex justify-around py-3 px-2 shadow-lg z-20">
+                <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600 text-xs font-medium">
+                    <i class="fa-solid fa-house text-lg"></i> Home
+                </button>
+                <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                    <i class="fa-solid fa-calendar-days text-lg"></i> Events
+                </button>
+                <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                    <i class="fa-solid fa-bullhorn text-lg"></i> Notice Board
+                </button>
+                <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                    <i class="fa-solid fa-id-card text-lg"></i> Profile
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative animate-scaleUp">
+            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
+            <div id="modal-body" class="space-y-3">
+                <!-- Injected Form Fields -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic & Persistence -->
+    <script>
+        // 3D Background Canvas Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5
+            });
+        }
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(30, 58, 138, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // App State & LocalStorage Persistence
+        let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
+        let students = JSON.parse(localStorage.getItem('nss_students')) || [
+            { pin: '24EEE01', name: 'Rahul Sharma', branch: 'EEE', attendance: { '2026-06-01': 'Present' } },
+            { pin: '24CSE02', name: 'Priya Reddy', branch: 'CSE', attendance: { '2026-06-01': 'Present' } }
+        ];
+        let messages = JSON.parse(localStorage.getItem('nss_messages')) || [
+            { title: 'Tree Plantation Drive', date: '2026-06-05', content: 'All NSS volunteers are requested to gather near campus ground at 9:00 AM.' }
+        ];
+        let events = JSON.parse(localStorage.getItem('nss_events')) || [
+            { name: 'Blood Donation Camp', date: '2026-06-10', venue: 'Main Auditorium', time: '10:00 AM' }
+        ];
+
+        function saveData() {
+            localStorage.setItem('nss_students', JSON.stringify(students));
+            localStorage.setItem('nss_messages', JSON.stringify(messages));
+            localStorage.setItem('nss_events', JSON.stringify(events));
+            localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+        }
+
+        // Check active session on load
+        window.onload = function() {
+            if (currentUser) {
+                showDashboard();
+            }
+        };
+
+        function openSignInModal(type) {
+            const modal = document.getElementById('signin-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            modal.classList.remove('hidden');
+
+            if (type === 'board') {
+                title.innerText = 'Board Member Access';
+                body.innerHTML = `
+                    <p class="text-xs text-slate-500">Enter secure board PIN code (Default PIN: 1947)</p>
+                    <input type="password" id="board-pin" placeholder="Enter PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <button onclick="verifyBoardPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow">Login as Board Member</button>
+                `;
+            } else {
+                title.innerText = 'Student Sign In / Sign Up';
+                body.innerHTML = `
+                    <p class="text-xs text-slate-500">Enter your assigned Student PIN (e.g. 24EEE01)</p>
+                    <input type="text" id="student-pin" placeholder="Enter Student PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 uppercase">
+                    <button onclick="verifyStudentPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow">Student Portal Login</button>
+                `;
+            }
+        }
+
+        function closeSignInModal() {
+            document.getElementById('signin-modal').classList.add('hidden');
+        }
+
+        function verifyBoardPin() {
+            const pin = document.getElementById('board-pin').value;
+            if (pin === '1947') {
+                currentUser = { role: 'board', name: 'Board Member' };
+                saveData();
+                closeSignInModal();
+                showDashboard();
+            } else {
+                alert('Invalid Board PIN! Try 1947');
+            }
+        }
+
+        function verifyStudentPin() {
+            const pin = document.getElementById('student-pin').value.trim().toUpperCase();
+            const student = students.find(s => s.pin === pin);
+            if (student) {
+                currentUser = { role: 'student', ...student };
+                saveData();
+                closeSignInModal();
+                showDashboard();
+            } else {
+                alert('PIN not found! Please contact board members to register your PIN.');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('nss_current_user');
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-landing').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('view-landing').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('user-role-badge').innerText = `Role: ${currentUser.role === 'board' ? 'Board Member' : 'Student (' + currentUser.branch + ')'}`;
+            switchTab('home');
+        }
+
+        // Tab Switching & View Renderer
+        function switchTab(tab) {
+            ['home', 'events', 'messages', 'profile'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 text-xs font-semibold' : 'flex flex-col items-center text-slate-400 text-xs font-medium';
+            });
+
+            const content = document.getElementById('tab-content');
+            if (tab === 'home') renderHomeTab(content);
+            else if (tab === 'events') renderEventsTab(content);
+            else if (tab === 'messages') renderMessagesTab(content);
+            else if (tab === 'profile') renderProfileTab(content);
+        }
+
+        function renderHomeTab(container) {
+            if (currentUser.role === 'board') {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                            <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
+                            <p class="text-xs text-blue-700">Manage students, post announcements, and record daily attendance.</p>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Add New Student</h4>
+                            <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="text" id="new-pin" placeholder="PIN Number (e.g., 24CSE05)" class="w-full px-3 py-2 text-xs border rounded-lg uppercase">
+                            <select id="new-branch" class="w-full px-3 py-2 text-xs border rounded-lg">
+                                <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
+                                <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
+                            </select>
+                            <button onclick="addStudent()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium">Add Student to Database</button>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Post Announcement / Message</h4>
+                            <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
+                            <button onclick="postMessage()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium">Broadcast Message</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="nss-gradient text-white p-5 rounded-2xl shadow-lg space-y-2">
+                            <p class="text-xs text-blue-200">Welcome back,</p>
+                            <h3 class="text-lg font-bold">${currentUser.name}</h3>
+                            <div class="flex gap-2 pt-2">
+                                <span class="bg-white/20 px-2.5 py-1 rounded-md text-[10px] font-medium">PIN: ${currentUser.pin}</span>
+                                <span class="bg-white/20 px-2.5 py-1 rounded-md text-[10px] font-medium">Branch: ${currentUser.branch}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Quick Attendance Status</h4>
+                            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
+                                <span>Recorded Attendance Days:</span>
+                                <span class="font-bold text-blue-600">${Object.keys(currentUser.attendance || {}).length} Days</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEventsTab(container) {
+            let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Upcoming NSS Events</h3>`;
+            events.forEach(e => {
+                html += `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
+                        <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-blue-900">${e.name}</h4><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded">${e.date}</span></div>
+                        <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderMessagesTab(container) {
+            let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Notice Board & Announcements</h3>`;
+            messages.forEach(m => {
+                html += `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
+                        <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><span class="text-[10px] text-slate-400">${m.date}</span></div>
+                        <p class="text-xs text-slate-600">${m.content}</p>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderProfileTab(container) {
+            container.innerHTML = `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                    <h3 class="font-bold text-sm text-slate-700">Registered Student Directory</h3>
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
+                        ${students.map(s => `
+                            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
+                                <div>
+                                    <p class="font-bold">${s.name}</p>
+                                    <p class="text-[10px] text-slate-500">${s.pin} •${s.branch}</p>
+                                </div>
+                                <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px]">Active</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Board Actions
+        function addStudent() {
+            const name = document.getElementById('new-name').value.trim();
+            const pin = document.getElementById('new-pin').value.trim().toUpperCase();
+            const branch = document.getElementById('new-branch').value;
+
+            if (!name || !pin) {
+                alert('Please enter both name and PIN');
+                return;
+            }
+            students.push({ pin, name, branch, attendance: {} });
+            saveData();
+            alert('Student added successfully!');
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-pin').value = '';
+        }
+
+        function postMessage() {
+            const title = document.getElementById('msg-title').value.trim();
+            const content = document.getElementById('msg-content').value.trim();
+            if (!title || !content) {
+                alert('Please fill in all announcement fields');
+                return;
+            }
+            messages.unshift({ title, date: new Date().toISOString().split('T')[0], content });
+            saveData();
+            alert('Message broadcasted successfully!');
+            document.getElementById('msg-title').value = '';
+            document.getElementById('msg-content').value = '';
+        }
+    </script>
+</body>
+</html>

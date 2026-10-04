@@ -116,9 +116,8 @@
     <!-- Firebase SDK & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase configuration from Firebase Console
         const firebaseConfig = {
             apiKey: "AIzaSyCgYi6crYP7Em-z32TeIjHpUPfLGMNWFDY",
             authDomain: "nss-unit-jngp.firebaseapp.com",
@@ -132,7 +131,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // App State
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
         let students = [];
         let messages = [];
@@ -140,7 +138,6 @@
             { name: 'Blood Donation Camp', date: '2026-06-10', venue: 'Main Auditorium', time: '10:00 AM' }
         ];
 
-        // Real-time Listeners for Firestore Data Sync
         function initRealtimeSync() {
             onSnapshot(collection(db, "students"), (snapshot) => {
                 students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -167,10 +164,10 @@
             modal.classList.remove('hidden');
 
             if (type === 'board') {
-                title.innerText = 'Board Member Access';
+                title.innerText = 'Board Member Secure Access';
                 body.innerHTML = `
-                    <p class="text-xs text-slate-500">Enter secure board PIN code (Default PIN: 1947)</p>
-                    <input type="password" id="board-pin" placeholder="Enter PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <p class="text-xs text-slate-500">Enter secure board PIN code (Hidden for security)</p>
+                    <input type="password" id="board-pin" placeholder="Enter Secure PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
                     <button onclick="window.verifyBoardPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow cursor-pointer">Login as Board Member</button>
                 `;
             } else {
@@ -195,7 +192,7 @@
                 window.closeSignInModal();
                 showDashboard();
             } else {
-                alert('Invalid Board PIN! Try 1947');
+                alert('Invalid Board PIN!');
             }
         };
 
@@ -247,9 +244,23 @@
                     <div class="space-y-4">
                         <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
                             <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
-                            <p class="text-xs text-blue-700">Manage cloud students database and post live announcements.</p>
+                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance, and post announcements.</p>
                         </div>
                         
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-clipboard-user mr-1 text-blue-600"></i> Take Daily Attendance</h4>
+                            <input type="date" id="att-date" class="w-full px-3 py-2 text-xs border rounded-lg" value="${new Date().toISOString().split('T')[0]}">
+                            <select id="att-student-pin" class="w-full px-3 py-2 text-xs border rounded-lg">
+                                <option value="">Select Student</option>
+                                ${students.map(s => `<option value="${s.pin}">${s.name} (${s.pin})</option>`).join('')}
+                            </select>
+                            <select id="att-status" class="w-full px-3 py-2 text-xs border rounded-lg">
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                            </select>
+                            <button onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Attendance to Cloud</button>
+                        </div>
+
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
                             <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Add New Student to Firebase</h4>
                             <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border rounded-lg">
@@ -258,18 +269,32 @@
                                 <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
                                 <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
                             </select>
-                            <button onclick="window.addStudent()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save to Firebase Database</button>
+                            <button onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Student to Database</button>
                         </div>
 
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
                             <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Post Live Announcement</h4>
                             <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
-                            <button onclick="window.postMessage()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
+                            <button onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
                         </div>
                     </div>
                 `;
             } else {
+                let attendanceListHtml = '';
+                const userAtt = currentUser.attendance || {};
+                for (const [date, status] of Object.entries(userAtt)) {
+                    attendanceListHtml += `
+                        <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
+                            <span class="font-medium text-slate-700"><i class="fa-solid fa-calendar mr-1 text-blue-500"></i> ${date}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${status === 'Present' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${status}</span>
+                        </div>
+                    `;
+                }
+                if (!attendanceListHtml) {
+                    attendanceListHtml = `<p class="text-xs text-slate-400 text-center py-2">No attendance records logged yet.</p>`;
+                }
+
                 container.innerHTML = `
                     <div class="space-y-4">
                         <div class="nss-gradient text-white p-5 rounded-2xl shadow-lg space-y-2">
@@ -282,10 +307,9 @@
                         </div>
 
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Quick Attendance Status</h4>
-                            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
-                                <span>Cloud Recorded Days:</span>
-                                <span class="font-bold text-blue-600">${Object.keys(currentUser.attendance || {}).length} Days</span>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">My Attendance History</h4>
+                            <div class="space-y-2 max-h-60 overflow-y-auto">
+                                ${attendanceListHtml}
                             </div>
                         </div>
                     </div>
@@ -355,14 +379,43 @@
                     name: name,
                     pin: pin,
                     branch: branch,
-                    attendance: { '2026-06-01': 'Present' }
+                    attendance: {}
                 });
                 alert('Student successfully saved to Firebase!');
                 document.getElementById('new-name').value = '';
                 document.getElementById('new-pin').value = '';
             } catch (error) {
                 console.error("Error adding student: ", error);
-                alert('Failed to add student. Check console.');
+                alert('Failed to add student.');
+            }
+        };
+
+        window.markAttendance = async function() {
+            const date = document.getElementById('att-date').value;
+            const pin = document.getElementById('att-student-pin').value;
+            const status = document.getElementById('att-status').value;
+
+            if (!date || !pin) {
+                alert('Please select a date and a student.');
+                return;
+            }
+
+            try {
+                const studentRef = doc(db, "students", pin);
+                const studentDoc = students.find(s => s.pin === pin);
+                if (!studentDoc) return;
+
+                let updatedAttendance = studentDoc.attendance || {};
+                updatedAttendance[date] = status;
+
+                await updateDoc(studentRef, {
+                    attendance: updatedAttendance
+                });
+
+                alert(`Attendance marked as ${status} for ${pin} on ${date}!`);
+            } catch (error) {
+                console.error("Error updating attendance: ", error);
+                alert('Failed to update attendance.');
             }
         };
 

@@ -26,9 +26,7 @@
         <div id="view-landing" class="flex flex-col min-h-screen p-6 justify-between nss-gradient text-white">
             <div class="text-center pt-6 space-y-4">
                 <div class="flex justify-center items-center gap-4 animate-bounce">
-                    <!-- NSS Emblem (1829.jpg) -->
                     <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" alt="NSS Emblem" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover">
-                    <!-- JNGP Crest (1831.jpg) -->
                     <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150" alt="JNGP Crest" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover">
                 </div>
                 <h1 class="text-2xl font-bold tracking-wide">NSS UNIT JNGP</h1>
@@ -59,18 +57,17 @@
 
             <!-- Sign In Options -->
             <div class="space-y-3 pb-6">
-                <button onclick="openSignInModal('board')" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-blue-400">
+                <button onclick="openSignInModal('board')" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-blue-400 cursor-pointer">
                     <i class="fa-solid fa-user-shield text-lg"></i> Board Member Sign In
                 </button>
-                <button onclick="openSignInModal('student')" class="w-full bg-white/10 hover:bg-white/20 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-white/30">
+                <button onclick="openSignInModal('student')" class="w-full bg-white/10 hover:bg-white/20 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-3 border border-white/30 cursor-pointer">
                     <i class="fa-solid fa-user-graduate text-lg"></i> Student Sign In / Register
                 </button>
             </div>
         </div>
 
-        <!-- ==================== MAIN APP DASHBOARD (HIDDEN INITIALLY) ==================== -->
+        <!-- ==================== MAIN APP DASHBOARD ==================== -->
         <div id="view-dashboard" class="hidden flex-col flex-1 pb-20">
-            <!-- Header -->
             <div class="nss-gradient text-white p-4 rounded-b-3xl shadow-md">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-3">
@@ -80,109 +77,90 @@
                             <p class="text-[10px] text-blue-200" id="user-role-badge">Role: Guest</p>
                         </div>
                     </div>
-                    <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition">
+                    <button onclick="logout()" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition cursor-pointer">
                         <i class="fa-solid fa-power-off"></i> Logout
                     </button>
                 </div>
             </div>
 
             <!-- Dynamic Content Area -->
-            <div id="tab-content" class="p-4 flex-1 space-y-4">
-                <!-- Dynamically populated via JS -->
-            </div>
+            <div id="tab-content" class="p-4 flex-1 space-y-4"></div>
 
             <!-- Bottom Navigation Bar -->
             <div class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 flex justify-around py-3 px-2 shadow-lg z-20">
-                <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600 text-xs font-medium">
+                <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-house text-lg"></i> Home
                 </button>
-                <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-calendar-days text-lg"></i> Events
                 </button>
-                <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-bullhorn text-lg"></i> Notice Board
                 </button>
-                <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 text-xs font-medium">
+                <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-id-card text-lg"></i> Profile
                 </button>
             </div>
         </div>
-
     </div>
 
     <!-- Sign In Modal -->
     <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative animate-scaleUp">
-            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
-            <div id="modal-body" class="space-y-3">
-                <!-- Injected Form Fields -->
-            </div>
+            <div id="modal-body" class="space-y-3"></div>
         </div>
     </div>
 
-    <!-- JavaScript Logic & Persistence -->
-    <script>
-        // 3D Background Canvas Animation
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+    <!-- Firebase SDK & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        for (let i = 0; i < 40; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5
-            });
-        }
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(30, 58, 138, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
+        // Your Firebase configuration from Firebase Console
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgYi6crYP7Em-z32TeIjHpUPfLGMNWFDY",
+            authDomain: "nss-unit-jngp.firebaseapp.com",
+            projectId: "nss-unit-jngp",
+            storageBucket: "nss-unit-jngp.firebasestorage.app",
+            messagingSenderId: "827655385529",
+            appId: "1:827655385529:web:6df3292b78aef040a68668",
+            measurementId: "G-294DT88D4R"
+        };
 
-        // App State & LocalStorage Persistence
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // App State
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
-        let students = JSON.parse(localStorage.getItem('nss_students')) || [
-            { pin: '24EEE01', name: 'Rahul Sharma', branch: 'EEE', attendance: { '2026-06-01': 'Present' } },
-            { pin: '24CSE02', name: 'Priya Reddy', branch: 'CSE', attendance: { '2026-06-01': 'Present' } }
-        ];
-        let messages = JSON.parse(localStorage.getItem('nss_messages')) || [
-            { title: 'Tree Plantation Drive', date: '2026-06-05', content: 'All NSS volunteers are requested to gather near campus ground at 9:00 AM.' }
-        ];
-        let events = JSON.parse(localStorage.getItem('nss_events')) || [
+        let students = [];
+        let messages = [];
+        let events = [
             { name: 'Blood Donation Camp', date: '2026-06-10', venue: 'Main Auditorium', time: '10:00 AM' }
         ];
 
-        function saveData() {
-            localStorage.setItem('nss_students', JSON.stringify(students));
-            localStorage.setItem('nss_messages', JSON.stringify(messages));
-            localStorage.setItem('nss_events', JSON.stringify(events));
-            localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+        // Real-time Listeners for Firestore Data Sync
+        function initRealtimeSync() {
+            onSnapshot(collection(db, "students"), (snapshot) => {
+                students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (currentUser && currentUser.role === 'student') {
+                    const updatedMe = students.find(s => s.pin === currentUser.pin);
+                    if (updatedMe) {
+                        currentUser = { role: 'student', ...updatedMe };
+                        localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+                    }
+                }
+            });
+
+            onSnapshot(collection(db, "messages"), (snapshot) => {
+                messages = snapshot.docs.map(doc => doc.data());
+            });
         }
 
-        // Check active session on load
-        window.onload = function() {
-            if (currentUser) {
-                showDashboard();
-            }
-        };
+        initRealtimeSync();
 
-        function openSignInModal(type) {
+        window.openSignInModal = function(type) {
             const modal = document.getElementById('signin-modal');
             const title = document.getElementById('modal-title');
             const body = document.getElementById('modal-body');
@@ -193,66 +171,67 @@
                 body.innerHTML = `
                     <p class="text-xs text-slate-500">Enter secure board PIN code (Default PIN: 1947)</p>
                     <input type="password" id="board-pin" placeholder="Enter PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
-                    <button onclick="verifyBoardPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow">Login as Board Member</button>
+                    <button onclick="window.verifyBoardPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow cursor-pointer">Login as Board Member</button>
                 `;
             } else {
                 title.innerText = 'Student Sign In / Sign Up';
                 body.innerHTML = `
                     <p class="text-xs text-slate-500">Enter your assigned Student PIN (e.g. 24EEE01)</p>
                     <input type="text" id="student-pin" placeholder="Enter Student PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 uppercase">
-                    <button onclick="verifyStudentPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow">Student Portal Login</button>
+                    <button onclick="window.verifyStudentPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow cursor-pointer">Student Portal Login</button>
                 `;
             }
-        }
+        };
 
-        function closeSignInModal() {
+        window.closeSignInModal = function() {
             document.getElementById('signin-modal').classList.add('hidden');
-        }
+        };
 
-        function verifyBoardPin() {
+        window.verifyBoardPin = function() {
             const pin = document.getElementById('board-pin').value;
             if (pin === '1947') {
                 currentUser = { role: 'board', name: 'Board Member' };
-                saveData();
-                closeSignInModal();
+                localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+                window.closeSignInModal();
                 showDashboard();
             } else {
                 alert('Invalid Board PIN! Try 1947');
             }
-        }
+        };
 
-        function verifyStudentPin() {
+        window.verifyStudentPin = async function() {
             const pin = document.getElementById('student-pin').value.trim().toUpperCase();
-            const student = students.find(s => s.pin === pin);
-            if (student) {
-                currentUser = { role: 'student', ...student };
-                saveData();
-                closeSignInModal();
+            const studentRef = doc(db, "students", pin);
+            const studentSnap = await getDoc(studentRef);
+
+            if (studentSnap.exists()) {
+                currentUser = { role: 'student', id: studentSnap.id, ...studentSnap.data() };
+                localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+                window.closeSignInModal();
                 showDashboard();
             } else {
-                alert('PIN not found! Please contact board members to register your PIN.');
+                alert('PIN not found in Firebase! Please ask board members to register your PIN first.');
             }
-        }
+        };
 
-        function logout() {
+        window.logout = function() {
             currentUser = null;
             localStorage.removeItem('nss_current_user');
             document.getElementById('view-dashboard').classList.add('hidden');
             document.getElementById('view-landing').classList.remove('hidden');
-        }
+        };
 
         function showDashboard() {
             document.getElementById('view-landing').classList.add('hidden');
             document.getElementById('view-dashboard').classList.remove('hidden');
             document.getElementById('user-role-badge').innerText = `Role: ${currentUser.role === 'board' ? 'Board Member' : 'Student (' + currentUser.branch + ')'}`;
-            switchTab('home');
+            window.switchTab('home');
         }
 
-        // Tab Switching & View Renderer
-        function switchTab(tab) {
+        window.switchTab = function(tab) {
             ['home', 'events', 'messages', 'profile'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
-                if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 text-xs font-semibold' : 'flex flex-col items-center text-slate-400 text-xs font-medium';
+                if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 text-xs font-semibold cursor-pointer' : 'flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer';
             });
 
             const content = document.getElementById('tab-content');
@@ -260,7 +239,7 @@
             else if (tab === 'events') renderEventsTab(content);
             else if (tab === 'messages') renderMessagesTab(content);
             else if (tab === 'profile') renderProfileTab(content);
-        }
+        };
 
         function renderHomeTab(container) {
             if (currentUser.role === 'board') {
@@ -268,25 +247,25 @@
                     <div class="space-y-4">
                         <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
                             <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
-                            <p class="text-xs text-blue-700">Manage students, post announcements, and record daily attendance.</p>
+                            <p class="text-xs text-blue-700">Manage cloud students database and post live announcements.</p>
                         </div>
                         
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Add New Student</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Add New Student to Firebase</h4>
                             <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="text" id="new-pin" placeholder="PIN Number (e.g., 24CSE05)" class="w-full px-3 py-2 text-xs border rounded-lg uppercase">
                             <select id="new-branch" class="w-full px-3 py-2 text-xs border rounded-lg">
                                 <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
                                 <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
                             </select>
-                            <button onclick="addStudent()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium">Add Student to Database</button>
+                            <button onclick="window.addStudent()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save to Firebase Database</button>
                         </div>
 
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Post Announcement / Message</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Post Live Announcement</h4>
                             <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
-                            <button onclick="postMessage()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium">Broadcast Message</button>
+                            <button onclick="window.postMessage()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
                         </div>
                     </div>
                 `;
@@ -305,7 +284,7 @@
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
                             <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Quick Attendance Status</h4>
                             <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
-                                <span>Recorded Attendance Days:</span>
+                                <span>Cloud Recorded Days:</span>
                                 <span class="font-bold text-blue-600">${Object.keys(currentUser.attendance || {}).length} Days</span>
                             </div>
                         </div>
@@ -345,7 +324,7 @@
         function renderProfileTab(container) {
             container.innerHTML = `
                 <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                    <h3 class="font-bold text-sm text-slate-700">Registered Student Directory</h3>
+                    <h3 class="font-bold text-sm text-slate-700">Firebase Student Directory</h3>
                     <div class="space-y-2 max-h-96 overflow-y-auto">
                         ${students.map(s => `
                             <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
@@ -361,8 +340,7 @@
             `;
         }
 
-        // Board Actions
-        function addStudent() {
+        window.addStudent = async function() {
             const name = document.getElementById('new-name').value.trim();
             const pin = document.getElementById('new-pin').value.trim().toUpperCase();
             const branch = document.getElementById('new-branch').value;
@@ -371,26 +349,51 @@
                 alert('Please enter both name and PIN');
                 return;
             }
-            students.push({ pin, name, branch, attendance: {} });
-            saveData();
-            alert('Student added successfully!');
-            document.getElementById('new-name').value = '';
-            document.getElementById('new-pin').value = '';
-        }
 
-        function postMessage() {
+            try {
+                await setDoc(doc(db, "students", pin), {
+                    name: name,
+                    pin: pin,
+                    branch: branch,
+                    attendance: { '2026-06-01': 'Present' }
+                });
+                alert('Student successfully saved to Firebase!');
+                document.getElementById('new-name').value = '';
+                document.getElementById('new-pin').value = '';
+            } catch (error) {
+                console.error("Error adding student: ", error);
+                alert('Failed to add student. Check console.');
+            }
+        };
+
+        window.postMessage = async function() {
             const title = document.getElementById('msg-title').value.trim();
             const content = document.getElementById('msg-content').value.trim();
             if (!title || !content) {
                 alert('Please fill in all announcement fields');
                 return;
             }
-            messages.unshift({ title, date: new Date().toISOString().split('T')[0], content });
-            saveData();
-            alert('Message broadcasted successfully!');
-            document.getElementById('msg-title').value = '';
-            document.getElementById('msg-content').value = '';
-        }
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    title: title,
+                    content: content,
+                    date: new Date().toISOString().split('T')[0]
+                });
+                alert('Announcement broadcasted to Firebase!');
+                document.getElementById('msg-title').value = '';
+                document.getElementById('msg-content').value = '';
+            } catch (error) {
+                console.error("Error posting message: ", error);
+                alert('Failed to post announcement.');
+            }
+        };
+
+        window.onload = function() {
+            if (currentUser) {
+                showDashboard();
+            }
+        };
     </script>
 </body>
 </html>

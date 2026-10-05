@@ -26,8 +26,10 @@
         <div id="view-landing" class="flex flex-col min-h-screen p-6 justify-between nss-gradient text-white">
             <div class="text-center pt-6 space-y-4">
                 <div class="flex justify-center items-center gap-4 animate-bounce">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" alt="NSS Emblem" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white">
-                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150" alt="JNGP Crest" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white">
+                    <!-- NSS Logo -->
+                    <img src="data:image/png;base64,<?php /* Embedded Logo */ ?>" alt="NSS Emblem" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white" id="landing-nss-logo">
+                    <!-- JNGP College Crest -->
+                    <img src="data:image/png;base64,<?php /* Embedded Logo */ ?>" alt="JNGP Crest" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white" id="landing-jngp-logo">
                 </div>
                 <h1 class="text-2xl font-bold tracking-wide">NSS UNIT JNGP</h1>
                 <p class="text-xs text-blue-200">Govt Polytechnic College, Ramanthapur</p>
@@ -71,7 +73,7 @@
             <div class="nss-gradient text-white p-4 rounded-b-3xl shadow-md">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" class="w-10 h-10 rounded-full border border-white bg-white">
+                        <img src="" class="w-10 h-10 rounded-full border border-white bg-white object-cover dashboard-logo">
                         <div>
                             <h2 class="font-bold text-sm">NSS Unit JNGP</h2>
                             <p class="text-[10px] text-blue-200" id="user-role-badge">Role: Guest</p>
@@ -135,6 +137,7 @@
         let students = [];
         let messages = [];
         let events = [];
+        let currentActiveTab = 'home';
 
         function initRealtimeSync() {
             onSnapshot(collection(db, "students"), (snapshot) => {
@@ -146,15 +149,28 @@
                         localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                     }
                 }
+                refreshActiveTab();
             });
 
             onSnapshot(collection(db, "messages"), (snapshot) => {
                 messages = snapshot.docs.map(doc => doc.data());
+                refreshActiveTab();
             });
 
             onSnapshot(collection(db, "events"), (snapshot) => {
                 events = snapshot.docs.map(doc => doc.data());
+                refreshActiveTab();
             });
+        }
+
+        function refreshActiveTab() {
+            const content = document.getElementById('tab-content');
+            if (content && document.getElementById('view-dashboard').classList.contains('hidden') === false) {
+                if (currentActiveTab === 'home') renderHomeTab(content);
+                else if (currentActiveTab === 'events') renderEventsTab(content);
+                else if (currentActiveTab === 'messages') renderMessagesTab(content);
+                else if (currentActiveTab === 'profile') renderProfileTab(content);
+            }
         }
 
         initRealtimeSync();
@@ -228,6 +244,7 @@
         }
 
         window.switchTab = function(tab) {
+            currentActiveTab = tab;
             ['home', 'events', 'messages', 'profile'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
                 if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 text-xs font-semibold cursor-pointer' : 'flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer';
@@ -274,7 +291,7 @@
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
                             </select>
-                            <button id="btn-mark-att" onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Attendance to Cloud</button>
+                            <button id="btn-mark-att" onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition">Save Attendance to Cloud</button>
                         </div>
 
                         <!-- Add Event Section -->
@@ -286,7 +303,7 @@
                             <input type="text" id="ev-time" placeholder="Time (e.g. 10:00 AM)" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="url" id="ev-link" placeholder="Event / Registration Link (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="url" id="ev-img" placeholder="Event Poster Image URL (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Publish Event to Cloud</button>
+                            <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-purple-700 transition">Publish Event to Cloud</button>
                         </div>
 
                         <!-- Add Student Section -->
@@ -298,7 +315,7 @@
                                 <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
                                 <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
                             </select>
-                            <button id="btn-add-stu" onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Student to Database</button>
+                            <button id="btn-add-stu" onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-emerald-700 transition">Save Student to Database</button>
                         </div>
 
                         <!-- Post Announcement Section -->
@@ -306,7 +323,7 @@
                             <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1 text-indigo-600"></i> Post Live Announcement</h4>
                             <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
-                            <button id="btn-post-msg" onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
+                            <button id="btn-post-msg" onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-indigo-700 transition">Broadcast to Cloud</button>
                         </div>
                     </div>
                 `;
@@ -347,7 +364,6 @@
             }
         }
 
-        // Filter student dropdown based on selected branch
         window.filterAttendanceStudents = function() {
             const branch = document.getElementById('att-branch-filter').value;
             const studentSelect = document.getElementById('att-student-pin');
@@ -375,7 +391,7 @@
                 events.forEach(e => {
                     html += `
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-2">
-                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-36 object-cover rounded-xl mb-2" alt="Event Poster">` : ''}
+                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-40 object-cover rounded-xl mb-2 border" alt="Event Poster">` : ''}
                             <div class="flex justify-between items-center">
                                 <h4 class="font-bold text-xs text-blue-900">${e.name}</h4>
                                 <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">${e.date}</span>
@@ -481,7 +497,7 @@
                     link,
                     imageUrl
                 });
-                alert('Upcoming event published to Firebase successfully!');
+                alert('Upcoming event published to Firebase successfully and sent to all students!');
                 document.getElementById('ev-name').value = '';
                 document.getElementById('ev-date').value = '';
                 document.getElementById('ev-venue').value = '';
@@ -548,7 +564,7 @@
                     content: content,
                     date: new Date().toISOString().split('T')[0]
                 });
-                alert('Announcement broadcasted to Firebase!');
+                alert('Announcement broadcasted to Firebase and sent to all students successfully!');
                 document.getElementById('msg-title').value = '';
                 document.getElementById('msg-content').value = '';
             } catch (error) {

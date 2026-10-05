@@ -26,9 +26,7 @@
         <div id="view-landing" class="flex flex-col min-h-screen p-6 justify-between nss-gradient text-white">
             <div class="text-center pt-6 space-y-4">
                 <div class="flex justify-center items-center gap-4 animate-bounce">
-                    <!-- NSS Logo -->
                     <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" alt="NSS Emblem" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white">
-                    <!-- JNGP College Logo -->
                     <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150" alt="JNGP Crest" class="w-20 h-20 rounded-full border-2 border-white shadow-lg object-cover bg-white">
                 </div>
                 <h1 class="text-2xl font-bold tracking-wide">NSS UNIT JNGP</h1>
@@ -136,9 +134,7 @@
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
         let students = [];
         let messages = [];
-        let events = [
-            { name: 'Blood Donation Camp', date: '2026-06-10', venue: 'Main Auditorium', time: '10:00 AM' }
-        ];
+        let events = [];
 
         function initRealtimeSync() {
             onSnapshot(collection(db, "students"), (snapshot) => {
@@ -154,6 +150,10 @@
 
             onSnapshot(collection(db, "messages"), (snapshot) => {
                 messages = snapshot.docs.map(doc => doc.data());
+            });
+
+            onSnapshot(collection(db, "events"), (snapshot) => {
+                events = snapshot.docs.map(doc => doc.data());
             });
         }
 
@@ -246,39 +246,67 @@
                     <div class="space-y-4">
                         <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
                             <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
-                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance, and post announcements.</p>
+                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance by branch, add events, and post announcements.</p>
                         </div>
                         
+                        <!-- Attendance Section (Branch-First) -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
                             <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-clipboard-user mr-1 text-blue-600"></i> Take Daily Attendance</h4>
                             <input type="date" id="att-date" class="w-full px-3 py-2 text-xs border rounded-lg" value="${new Date().toISOString().split('T')[0]}">
-                            <select id="att-student-pin" class="w-full px-3 py-2 text-xs border rounded-lg">
-                                <option value="">Select Student</option>
-                                ${students.map(s => `<option value="${s.pin}">${s.name} (${s.pin})</option>`).join('')}
+                            
+                            <!-- Select Branch First -->
+                            <select id="att-branch-filter" onchange="window.filterAttendanceStudents()" class="w-full px-3 py-2 text-xs border rounded-lg font-medium text-slate-700">
+                                <option value="">-- Select Branch First --</option>
+                                <option value="EEE">EEE</option>
+                                <option value="CSE">CSE</option>
+                                <option value="ECE">ECE</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Chemical">Chemical</option>
                             </select>
+
+                            <!-- Filtered Student Dropdown -->
+                            <select id="att-student-pin" class="w-full px-3 py-2 text-xs border rounded-lg">
+                                <option value="">-- Select Branch Above First --</option>
+                            </select>
+
                             <select id="att-status" class="w-full px-3 py-2 text-xs border rounded-lg">
                                 <option value="Present">Present</option>
                                 <option value="Absent">Absent</option>
                             </select>
-                            <button onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Attendance to Cloud</button>
+                            <button id="btn-mark-att" onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Attendance to Cloud</button>
                         </div>
 
+                        <!-- Add Event Section -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Add New Student to Firebase</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-calendar-plus mr-1 text-purple-600"></i> Add Upcoming Event</h4>
+                            <input type="text" id="ev-name" placeholder="Event Name (e.g. Blood Donation Camp)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="date" id="ev-date" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="text" id="ev-venue" placeholder="Venue (e.g. Main Auditorium)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="text" id="ev-time" placeholder="Time (e.g. 10:00 AM)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="url" id="ev-link" placeholder="Event / Registration Link (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="url" id="ev-img" placeholder="Event Poster Image URL (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Publish Event to Cloud</button>
+                        </div>
+
+                        <!-- Add Student Section -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-user-plus mr-1 text-emerald-600"></i> Add New Student to Firebase</h4>
                             <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="text" id="new-pin" placeholder="PIN Number (e.g., 24CSE05)" class="w-full px-3 py-2 text-xs border rounded-lg uppercase">
                             <select id="new-branch" class="w-full px-3 py-2 text-xs border rounded-lg">
                                 <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
                                 <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
                             </select>
-                            <button onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Student to Database</button>
+                            <button id="btn-add-stu" onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Save Student to Database</button>
                         </div>
 
+                        <!-- Post Announcement Section -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Post Live Announcement</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1 text-indigo-600"></i> Post Live Announcement</h4>
                             <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
-                            <button onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
+                            <button id="btn-post-msg" onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer">Broadcast to Cloud</button>
                         </div>
                     </div>
                 `;
@@ -319,30 +347,63 @@
             }
         }
 
+        // Filter student dropdown based on selected branch
+        window.filterAttendanceStudents = function() {
+            const branch = document.getElementById('att-branch-filter').value;
+            const studentSelect = document.getElementById('att-student-pin');
+            if (!studentSelect) return;
+
+            if (!branch) {
+                studentSelect.innerHTML = `<option value="">-- Select Branch Above First --</option>`;
+                return;
+            }
+
+            const filteredStudents = students.filter(s => s.branch === branch);
+            if (filteredStudents.length === 0) {
+                studentSelect.innerHTML = `<option value="">No students found in ${branch}</option>`;
+            } else {
+                studentSelect.innerHTML = `<option value="">Select Student</option>` + 
+                    filteredStudents.map(s => `<option value="${s.pin}">${s.name} (${s.pin})</option>`).join('');
+            }
+        };
+
         function renderEventsTab(container) {
             let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Upcoming NSS Events</h3>`;
-            events.forEach(e => {
-                html += `
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
-                        <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-blue-900">${e.name}</h4><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded">${e.date}</span></div>
-                        <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
-                    </div>
-                `;
-            });
+            if (events.length === 0) {
+                html += `<p class="text-xs text-slate-400 text-center py-4">No upcoming events posted yet.</p>`;
+            } else {
+                events.forEach(e => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-2">
+                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-36 object-cover rounded-xl mb-2" alt="Event Poster">` : ''}
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-xs text-blue-900">${e.name}</h4>
+                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">${e.date}</span>
+                            </div>
+                            <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
+                            ${e.link ? `<a href="${e.link}" target="_blank" class="inline-block mt-1 bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-medium hover:bg-blue-700 transition"><i class="fa-solid fa-external-link-alt mr-1"></i> Event / Registration Link</a>` : ''}
+                        </div>
+                    `;
+                });
+            }
             html += `</div>`;
             container.innerHTML = html;
         }
 
         function renderMessagesTab(container) {
             let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Notice Board & Announcements</h3>`;
-            messages.forEach(m => {
-                html += `
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
-                        <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><span class="text-[10px] text-slate-400">${m.date}</span></div>
-                        <p class="text-xs text-slate-600">${m.content}</p>
-                    </div>
-                `;
-            });
+            if (messages.length === 0) {
+                html += `<p class="text-xs text-slate-400 text-center py-4">No announcements posted yet.</p>`;
+            } else {
+                messages.forEach(m => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
+                            <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><span class="text-[10px] text-slate-400">${m.date}</span></div>
+                            <p class="text-xs text-slate-600">${m.content}</p>
+                        </div>
+                    `;
+                });
+            }
             html += `</div>`;
             container.innerHTML = html;
         }
@@ -367,6 +428,7 @@
         }
 
         window.addStudent = async function() {
+            const btn = document.getElementById('btn-add-stu');
             const name = document.getElementById('new-name').value.trim();
             const pin = document.getElementById('new-pin').value.trim().toUpperCase();
             const branch = document.getElementById('new-branch').value;
@@ -376,6 +438,7 @@
                 return;
             }
 
+            if (btn) btn.disabled = true;
             try {
                 await setDoc(doc(db, "students", pin), {
                     name: name,
@@ -389,23 +452,69 @@
             } catch (error) {
                 console.error("Error adding student: ", error);
                 alert('Failed to add student.');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        window.addEvent = async function() {
+            const btn = document.getElementById('btn-add-ev');
+            const name = document.getElementById('ev-name').value.trim();
+            const date = document.getElementById('ev-date').value;
+            const venue = document.getElementById('ev-venue').value.trim();
+            const time = document.getElementById('ev-time').value.trim();
+            const link = document.getElementById('ev-link').value.trim();
+            const imageUrl = document.getElementById('ev-img').value.trim();
+
+            if (!name || !date || !venue || !time) {
+                alert('Please fill in Name, Date, Venue, and Time.');
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            try {
+                await addDoc(collection(db, "events"), {
+                    name,
+                    date,
+                    venue,
+                    time,
+                    link,
+                    imageUrl
+                });
+                alert('Upcoming event published to Firebase successfully!');
+                document.getElementById('ev-name').value = '';
+                document.getElementById('ev-date').value = '';
+                document.getElementById('ev-venue').value = '';
+                document.getElementById('ev-time').value = '';
+                document.getElementById('ev-link').value = '';
+                document.getElementById('ev-img').value = '';
+            } catch (error) {
+                console.error("Error adding event: ", error);
+                alert('Failed to publish event.');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         };
 
         window.markAttendance = async function() {
+            const btn = document.getElementById('btn-mark-att');
             const date = document.getElementById('att-date').value;
             const pin = document.getElementById('att-student-pin').value;
             const status = document.getElementById('att-status').value;
 
             if (!date || !pin) {
-                alert('Please select a date and a student.');
+                alert('Please select a branch, student, and date.');
                 return;
             }
 
+            if (btn) btn.disabled = true;
             try {
                 const studentRef = doc(db, "students", pin);
                 const studentDoc = students.find(s => s.pin === pin);
-                if (!studentDoc) return;
+                if (!studentDoc) {
+                    alert('Student not found.');
+                    return;
+                }
 
                 let updatedAttendance = studentDoc.attendance || {};
                 updatedAttendance[date] = status;
@@ -418,10 +527,13 @@
             } catch (error) {
                 console.error("Error updating attendance: ", error);
                 alert('Failed to update attendance.');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         };
 
         window.postMessage = async function() {
+            const btn = document.getElementById('btn-post-msg');
             const title = document.getElementById('msg-title').value.trim();
             const content = document.getElementById('msg-content').value.trim();
             if (!title || !content) {
@@ -429,6 +541,7 @@
                 return;
             }
 
+            if (btn) btn.disabled = true;
             try {
                 await addDoc(collection(db, "messages"), {
                     title: title,
@@ -441,6 +554,8 @@
             } catch (error) {
                 console.error("Error posting message: ", error);
                 alert('Failed to post announcement.');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         };
 

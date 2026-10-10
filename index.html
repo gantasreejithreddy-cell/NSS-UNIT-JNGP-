@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NSS Unit JNGP - Polytechnic College Ramanthapur</title>
+    <!-- PWA Manifest Meta Tags -->
+    <meta name="theme-color" content="#1E3A8A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NSS JNGP">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+      'name': 'NSS Unit JNGP',
+      'short_name': 'NSS JNGP',
+      'start_url': '.',
+      'display': 'standalone',
+      'background_color': '#f0f4f8',
+      'theme_color': '#1E3A8A',
+      'icons': [{
+        'src': 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=192',
+        'sizes': '192x192',
+        'type': 'image/png'
+      }]
+    }">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -84,13 +102,13 @@
                     <i class="fa-solid fa-house text-lg"></i> Home
                 </button>
                 <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-calendar-days text-lg"></i> Events
+                    <i class="fa-solid fa-calendar-days text-lg"></i> Events & Gallery
                 </button>
                 <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-bullhorn text-lg"></i> Notice Board
+                    <i class="fa-solid fa-bullhorn text-lg"></i> Notices
                 </button>
                 <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-id-card text-lg"></i> Profile
+                    <i class="fa-solid fa-id-card text-lg"></i> Directory
                 </button>
             </div>
         </div>
@@ -98,7 +116,7 @@
 
     <!-- Sign In Modal -->
     <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative animate-scaleUp">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative">
             <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
             <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
             <div id="modal-body" class="space-y-3"></div>
@@ -127,6 +145,7 @@
         let students = [];
         let messages = [];
         let events = [];
+        let gallery = [];
         let currentActiveTab = 'home';
 
         function initRealtimeSync() {
@@ -148,7 +167,12 @@
             });
 
             onSnapshot(collection(db, "events"), (snapshot) => {
-                events = snapshot.docs.map(doc => doc.data());
+                events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                refreshActiveTab();
+            });
+
+            onSnapshot(collection(db, "gallery"), (snapshot) => {
+                gallery = snapshot.docs.map(doc => doc.data());
                 refreshActiveTab();
             });
         }
@@ -253,7 +277,7 @@
                     <div class="space-y-4">
                         <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
                             <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
-                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance by branch, add events, and post announcements.</p>
+                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance by branch, add events with registration links & banners, and upload proof galleries.</p>
                         </div>
                         
                         <!-- Attendance Section (Branch-First) -->
@@ -282,16 +306,24 @@
                             <button id="btn-mark-att" onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition">Save Attendance to Cloud</button>
                         </div>
 
-                        <!-- Add Event Section -->
+                        <!-- Add Event Section (With Banner & Registration Link) -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-calendar-plus mr-1 text-purple-600"></i> Add Upcoming Event</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-calendar-plus mr-1 text-purple-600"></i> Add Upcoming Event / Campaign</h4>
                             <input type="text" id="ev-name" placeholder="Event Name (e.g. Blood Donation Camp)" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="date" id="ev-date" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="text" id="ev-venue" placeholder="Venue (e.g. Main Auditorium)" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <input type="text" id="ev-time" placeholder="Time (e.g. 10:00 AM)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="url" id="ev-link" placeholder="Event / Registration Link (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="url" id="ev-img" placeholder="Event Poster Image URL (Optional)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="url" id="ev-link" placeholder="Registration Website Link (e.g. https://forms.gle/...)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="url" id="ev-img" placeholder="Event Banner / Photo Image URL" class="w-full px-3 py-2 text-xs border rounded-lg">
                             <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-purple-700 transition">Publish Event to Cloud</button>
+                        </div>
+
+                        <!-- Upload Event Gallery / Proof -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-images mr-1 text-amber-600"></i> Upload Event Gallery / Proof Snapshot</h4>
+                            <input type="text" id="gal-title" placeholder="Event Activity Title (e.g. Tree Plantation Drive)" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <input type="url" id="gal-img" placeholder="Activity Photo / Proof Image URL" class="w-full px-3 py-2 text-xs border rounded-lg">
+                            <button id="btn-add-gal" onclick="window.addGalleryItem()" class="w-full bg-amber-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-amber-700 transition">Upload to Gallery</button>
                         </div>
 
                         <!-- Add Student Section -->
@@ -318,7 +350,14 @@
             } else {
                 let attendanceListHtml = '';
                 const userAtt = currentUser.attendance || {};
+                let totalClasses = Object.keys(userAtt).length;
+                let presentCount = 0;
+                let absentCount = 0;
+
                 for (const [date, status] of Object.entries(userAtt)) {
+                    if (status === 'Present') presentCount++;
+                    else absentCount++;
+
                     attendanceListHtml += `
                         <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
                             <span class="font-medium text-slate-700"><i class="fa-solid fa-calendar mr-1 text-blue-500"></i> ${date}</span>
@@ -329,6 +368,8 @@
                 if (!attendanceListHtml) {
                     attendanceListHtml = `<p class="text-xs text-slate-400 text-center py-2">No attendance records logged yet.</p>`;
                 }
+
+                let percentage = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0;
 
                 container.innerHTML = `
                     <div class="space-y-4">
@@ -341,8 +382,36 @@
                             </div>
                         </div>
 
+                        <!-- Attendance Analysis Report Card -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">My Attendance History</h4>
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-blue-600 mr-1"></i> Attendance Analysis Report</h4>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-blue-50 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 font-medium">Total Classes</p>
+                                    <p class="text-base font-bold text-blue-900">${totalClasses}</p>
+                                </div>
+                                <div class="bg-emerald-50 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 font-medium">Days Present</p>
+                                    <p class="text-base font-bold text-emerald-700">${presentCount}</p>
+                                </div>
+                                <div class="bg-rose-50 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 font-medium">Days Absent</p>
+                                    <p class="text-base font-bold text-rose-700">${absentCount}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-semibold">
+                                    <span class="text-slate-600">Attendance Percentage</span>
+                                    <span class="${percentage >= 75 ? 'text-emerald-600' : 'text-amber-600'}">${percentage}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Detailed Daily Logs</h4>
                             <div class="space-y-2 max-h-60 overflow-y-auto">
                                 ${attendanceListHtml}
                             </div>
@@ -372,26 +441,44 @@
         };
 
         function renderEventsTab(container) {
-            let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Upcoming NSS Events</h3>`;
+            let eventsHtml = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-calendar-star text-purple-600 mr-1"></i> Upcoming Events & Registration</h3>`;
             if (events.length === 0) {
-                html += `<p class="text-xs text-slate-400 text-center py-4">No upcoming events posted yet.</p>`;
+                eventsHtml += `<p class="text-xs text-slate-400 text-center py-2">No upcoming events posted yet.</p>`;
             } else {
                 events.forEach(e => {
-                    html += `
+                    eventsHtml += `
                         <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-2">
-                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-40 object-cover rounded-xl mb-2 border" alt="Event Poster">` : ''}
+                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-40 object-cover rounded-xl mb-2 border" alt="Event Banner">` : ''}
                             <div class="flex justify-between items-center">
                                 <h4 class="font-bold text-xs text-blue-900">${e.name}</h4>
                                 <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">${e.date}</span>
                             </div>
                             <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
-                            ${e.link ? `<a href="${e.link}" target="_blank" class="inline-block mt-1 bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-medium hover:bg-blue-700 transition"><i class="fa-solid fa-external-link-alt mr-1"></i> Event / Registration Link</a>` : ''}
+                            ${e.link ? `<a href="${e.link}" target="_blank" class="inline-block mt-1 bg-blue-600 text-white text-[10px] px-3 py-2 rounded-lg font-medium hover:bg-blue-700 transition w-full text-center"><i class="fa-solid fa-external-link-alt mr-1"></i> Register / Open Event Website Link</a>` : ''}
                         </div>
                     `;
                 });
             }
-            html += `</div>`;
-            container.innerHTML = html;
+            eventsHtml += `</div>`;
+
+            let galleryHtml = `<div class="space-y-3 mt-6"><h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-images text-amber-600 mr-1"></i> Event Photo Gallery & Proofs</h3>`;
+            if (gallery.length === 0) {
+                galleryHtml += `<p class="text-xs text-slate-400 text-center py-2">No gallery proofs uploaded yet.</p>`;
+            } else {
+                galleryHtml += `<div class="grid grid-cols-2 gap-2">`;
+                gallery.forEach(g => {
+                    galleryHtml += `
+                        <div class="bg-white p-2 rounded-xl border shadow-sm space-y-1">
+                            <img src="${g.imageUrl}" class="w-full h-28 object-cover rounded-lg border" alt="Proof Photo">
+                            <p class="text-[11px] font-semibold text-slate-700 truncate">${g.title}</p>
+                        </div>
+                    `;
+                });
+                galleryHtml += `</div>`;
+            }
+            galleryHtml += `</div>`;
+
+            container.innerHTML = eventsHtml + galleryHtml;
         }
 
         function renderMessagesTab(container) {
@@ -485,7 +572,7 @@
                     link,
                     imageUrl
                 });
-                alert('Upcoming event published to Firebase successfully and sent to all students!');
+                alert('Upcoming event with banner & link published successfully!');
                 document.getElementById('ev-name').value = '';
                 document.getElementById('ev-date').value = '';
                 document.getElementById('ev-venue').value = '';
@@ -495,6 +582,33 @@
             } catch (error) {
                 console.error("Error adding event: ", error);
                 alert('Failed to publish event.');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        window.addGalleryItem = async function() {
+            const btn = document.getElementById('btn-add-gal');
+            const title = document.getElementById('gal-title').value.trim();
+            const imageUrl = document.getElementById('gal-img').value.trim();
+
+            if (!title || !imageUrl) {
+                alert('Please enter both title and image URL.');
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            try {
+                await addDoc(collection(db, "gallery"), {
+                    title,
+                    imageUrl
+                });
+                alert('Event proof/gallery photo uploaded successfully!');
+                document.getElementById('gal-title').value = '';
+                document.getElementById('gal-img').value = '';
+            } catch (error) {
+                console.error("Error uploading gallery item: ", error);
+                alert('Failed to upload proof photo.');
             } finally {
                 if (btn) btn.disabled = false;
             }
@@ -552,7 +666,7 @@
                     content: content,
                     date: new Date().toISOString().split('T')[0]
                 });
-                alert('Announcement broadcasted to Firebase and sent to all students successfully!');
+                alert('Announcement broadcasted to Firebase successfully!');
                 document.getElementById('msg-title').value = '';
                 document.getElementById('msg-content').value = '';
             } catch (error) {

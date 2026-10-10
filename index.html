@@ -10,31 +10,30 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NSS JNGP">
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
-      'name': 'NSS Unit JNGP',
-      'short_name': 'NSS JNGP',
-      'start_url': '.',
-      'display': 'standalone',
-      'background_color': '#f0f4f8',
-      'theme_color': '#1E3A8A',
-      'icons': [{
-        'src': 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=192',
-        'sizes': '192x192',
-        'type': 'image/png'
+      %22name%22: %22NSS Unit JNGP%22,
+      %22short_name%22: %22NSS JNGP%22,
+      %22start_url%22: %22.%22,
+      %22display%22: %22standalone%22,
+      %22background_color%22: %22%23f0f4f8%22,
+      %22theme_color%22: %22%231E3A8A%22,
+      %22icons%22: [{
+        %22src%22: %22https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=192%22,
+        %22sizes%22: %22192x192%22,
+        %22type%22: %22image/png%22
       }]
     }">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #f0f4f8; }
+        body { font-family: 'Poppins', sans-serif; }
         .nss-gradient { background: linear-gradient(135deg, #0A192F 0%, #1E3A8A 50%, #2563EB 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 relative">
+<body id="app-body" class="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 relative">
     <canvas id="bgCanvas"></canvas>
-    <div id="app" class="relative z-10 max-w-md mx-auto min-h-screen bg-slate-50 shadow-2xl flex flex-col overflow-hidden">
+    <div id="app" class="relative z-10 max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden transition-colors duration-300">
         
         <!-- Welcome View -->
         <div id="view-landing" class="flex flex-col min-h-screen p-6 justify-between nss-gradient text-white">
@@ -80,34 +79,37 @@
 
         <!-- Main Dashboard -->
         <div id="view-dashboard" class="hidden flex-col flex-1 pb-20">
-            <div class="nss-gradient text-white p-4 rounded-b-3xl shadow-md">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" class="w-10 h-10 rounded-full border border-white bg-white">
-                        <div>
-                            <h2 class="font-bold text-sm">NSS Unit JNGP</h2>
-                            <p class="text-[10px] text-blue-200" id="user-role-badge">Role: Guest</p>
-                        </div>
+            <div class="nss-gradient text-white p-4 rounded-b-3xl shadow-md flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" class="w-10 h-10 rounded-full border border-white bg-white">
+                    <div>
+                        <h2 class="font-bold text-sm">NSS Unit JNGP</h2>
+                        <p class="text-[10px] text-blue-200" id="user-role-badge">Role: Guest</p>
                     </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleDarkMode()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-2.5 py-1.5 rounded-lg transition cursor-pointer" title="Toggle Dark/Light Mode">
+                        <i id="dark-mode-icon" class="fa-solid fa-moon"></i>
+                    </button>
                     <button onclick="logout()" class="bg-red-500/85 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition cursor-pointer">
-                        <i class="fa-solid fa-power-off"></i> Logout
+                        <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
             </div>
 
             <div id="tab-content" class="p-4 flex-1 space-y-4"></div>
 
-            <div class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 flex justify-around py-3 px-2 shadow-lg z-20">
-                <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600 text-xs font-medium cursor-pointer">
+            <div class="fixed bottom-0 max-w-md w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around py-3 px-2 shadow-lg z-20">
+                <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600 dark:text-blue-400 text-xs font-semibold cursor-pointer">
                     <i class="fa-solid fa-house text-lg"></i> Home
                 </button>
-                <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-calendar-days text-lg"></i> Events & Gallery
+                <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-400 dark:text-slate-500 text-xs font-medium cursor-pointer">
+                    <i class="fa-solid fa-calendar-days text-lg"></i> Events
                 </button>
-                <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
+                <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-400 dark:text-slate-500 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-bullhorn text-lg"></i> Notices
                 </button>
-                <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer">
+                <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 dark:text-slate-500 text-xs font-medium cursor-pointer">
                     <i class="fa-solid fa-id-card text-lg"></i> Directory
                 </button>
             </div>
@@ -116,9 +118,9 @@
 
     <!-- Sign In Modal -->
     <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative">
-            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative">
+            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:text-slate-300 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">Sign In</h3>
             <div id="modal-body" class="space-y-3"></div>
         </div>
     </div>
@@ -142,11 +144,34 @@
         const db = getFirestore(app);
 
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
+        let isDarkMode = localStorage.getItem('nss_dark_mode') === 'true';
         let students = [];
         let messages = [];
         let events = [];
         let gallery = [];
         let currentActiveTab = 'home';
+        let tempEventImageBase64 = '';
+        let tempGalleryImageBase64 = '';
+
+        function applyDarkMode() {
+            const body = document.getElementById('app-body');
+            const icon = document.getElementById('dark-mode-icon');
+            if (isDarkMode) {
+                body.classList.add('dark');
+                if (icon) icon.className = "fa-solid fa-sun text-amber-300";
+            } else {
+                body.classList.remove('dark');
+                if (icon) icon.className = "fa-solid fa-moon";
+            }
+        }
+
+        window.toggleDarkMode = function() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('nss_dark_mode', isDarkMode);
+            applyDarkMode();
+        };
+
+        applyDarkMode();
 
         function initRealtimeSync() {
             onSnapshot(collection(db, "students"), (snapshot) => {
@@ -198,15 +223,15 @@
             if (type === 'board') {
                 title.innerText = 'Board Member Secure Access';
                 body.innerHTML = `
-                    <p class="text-xs text-slate-500">Enter secure board PIN code</p>
-                    <input type="password" id="board-pin" placeholder="Enter Secure PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Enter secure board PIN code</p>
+                    <input type="password" id="board-pin" placeholder="Enter Secure PIN" class="w-full px-4 py-3 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600">
                     <button onclick="window.verifyBoardPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow cursor-pointer">Login as Board Member</button>
                 `;
             } else {
                 title.innerText = 'Student Sign In / Register';
                 body.innerHTML = `
-                    <p class="text-xs text-slate-500">Enter your assigned Student PIN (e.g. 24EEE01)</p>
-                    <input type="text" id="student-pin" placeholder="Enter Student PIN" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 uppercase">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Enter your assigned Student PIN (e.g. 24EEE01)</p>
+                    <input type="text" id="student-pin" placeholder="Enter Student PIN" class="w-full px-4 py-3 border dark:border-slate-700 dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 uppercase">
                     <button onclick="window.verifyStudentPin()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl shadow cursor-pointer">Student Portal Login</button>
                 `;
             }
@@ -261,7 +286,7 @@
             currentActiveTab = tab;
             ['home', 'events', 'messages', 'profile'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
-                if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 text-xs font-semibold cursor-pointer' : 'flex flex-col items-center text-slate-400 text-xs font-medium cursor-pointer';
+                if (btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-600 dark:text-blue-400 text-xs font-semibold cursor-pointer' : 'flex flex-col items-center text-slate-400 dark:text-slate-500 text-xs font-medium cursor-pointer';
             });
 
             const content = document.getElementById('tab-content');
@@ -275,18 +300,18 @@
             if (currentUser.role === 'board') {
                 container.innerHTML = `
                     <div class="space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
-                            <h3 class="font-bold text-blue-900 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
-                            <p class="text-xs text-blue-700">Manage cloud students database, take attendance by branch, add events with registration links & banners, and upload proof galleries.</p>
+                        <div class="bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 p-4 rounded-2xl">
+                            <h3 class="font-bold text-blue-900 dark:text-blue-300 text-sm mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Board Control Center</h3>
+                            <p class="text-xs text-blue-700 dark:text-blue-300">Take instant bulk attendance by branch, upload event banners/proofs directly from phone files, and manage cloud database.</p>
                         </div>
                         
-                        <!-- Attendance Section (Branch-First) -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-clipboard-user mr-1 text-blue-600"></i> Take Daily Attendance</h4>
-                            <input type="date" id="att-date" class="w-full px-3 py-2 text-xs border rounded-lg" value="${new Date().toISOString().split('T')[0]}">
+                        <!-- Bulk Attendance Section -->
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-clipboard-user mr-1 text-blue-600"></i> Fast Bulk Attendance</h4>
+                            <input type="date" id="att-date" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg" value="${new Date().toISOString().split('T')[0]}">
                             
-                            <select id="att-branch-filter" onchange="window.filterAttendanceStudents()" class="w-full px-3 py-2 text-xs border rounded-lg font-medium text-slate-700">
-                                <option value="">-- Select Branch First --</option>
+                            <select id="att-branch-filter" onchange="window.loadBranchStudentsForAttendance()" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg font-medium text-slate-700 dark:text-slate-200">
+                                <option value="">-- Select Branch to Load Students --</option>
                                 <option value="EEE">EEE</option>
                                 <option value="CSE">CSE</option>
                                 <option value="ECE">ECE</option>
@@ -295,55 +320,59 @@
                                 <option value="Chemical">Chemical</option>
                             </select>
 
-                            <select id="att-student-pin" class="w-full px-3 py-2 text-xs border rounded-lg">
-                                <option value="">-- Select Branch Above First --</option>
-                            </select>
+                            <div id="bulk-attendance-container" class="space-y-2 max-h-60 overflow-y-auto border dark:border-slate-700 p-2 rounded-xl bg-slate-50 dark:bg-slate-900">
+                                <p class="text-xs text-slate-400 text-center py-2">Select a branch above to view students.</p>
+                            </div>
 
-                            <select id="att-status" class="w-full px-3 py-2 text-xs border rounded-lg">
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                            </select>
-                            <button id="btn-mark-att" onclick="window.markAttendance()" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition">Save Attendance to Cloud</button>
+                            <button id="btn-submit-bulk" onclick="window.submitBulkAttendance()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer transition hidden">Submit All Attendance at Once</button>
                         </div>
 
-                        <!-- Add Event Section (With Banner & Registration Link) -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-calendar-plus mr-1 text-purple-600"></i> Add Upcoming Event / Campaign</h4>
-                            <input type="text" id="ev-name" placeholder="Event Name (e.g. Blood Donation Camp)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="date" id="ev-date" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="text" id="ev-venue" placeholder="Venue (e.g. Main Auditorium)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="text" id="ev-time" placeholder="Time (e.g. 10:00 AM)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="url" id="ev-link" placeholder="Registration Website Link (e.g. https://forms.gle/...)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="url" id="ev-img" placeholder="Event Banner / Photo Image URL" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-purple-700 transition">Publish Event to Cloud</button>
+                        <!-- Add Event Section (With File Image Uploader) -->
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-calendar-plus mr-1 text-purple-600"></i> Add Upcoming Event / Campaign</h4>
+                            <input type="text" id="ev-name" placeholder="Event Name (e.g. Blood Donation Camp)" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <input type="date" id="ev-date" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <input type="text" id="ev-venue" placeholder="Venue (e.g. Main Auditorium)" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <input type="text" id="ev-time" placeholder="Time (e.g. 10:00 AM)" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <input type="url" id="ev-link" placeholder="Registration Website Link" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Upload Event Banner Image from File:</label>
+                                <input type="file" id="ev-file-input" accept="image/*" onchange="window.handleEventImageFile(event)" class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer">
+                            </div>
+                            <button id="btn-add-ev" onclick="window.addEvent()" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer transition">Publish Event to Cloud</button>
                         </div>
 
-                        <!-- Upload Event Gallery / Proof -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-images mr-1 text-amber-600"></i> Upload Event Gallery / Proof Snapshot</h4>
-                            <input type="text" id="gal-title" placeholder="Event Activity Title (e.g. Tree Plantation Drive)" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="url" id="gal-img" placeholder="Activity Photo / Proof Image URL" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <button id="btn-add-gal" onclick="window.addGalleryItem()" class="w-full bg-amber-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-amber-700 transition">Upload to Gallery</button>
+                        <!-- Upload Event Gallery (With File Image Uploader) -->
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-images mr-1 text-amber-600"></i> Upload Event Gallery / Proof</h4>
+                            <input type="text" id="gal-title" placeholder="Activity Title" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Upload Proof Photo from File:</label>
+                                <input type="file" id="gal-file-input" accept="image/*" onchange="window.handleGalleryImageFile(event)" class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer">
+                            </div>
+                            <button id="btn-add-gal" onclick="window.addGalleryItem()" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer transition">Upload to Gallery</button>
                         </div>
 
                         <!-- Add Student Section -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-user-plus mr-1 text-emerald-600"></i> Add New Student to Firebase</h4>
-                            <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <input type="text" id="new-pin" placeholder="PIN Number (e.g., 24CSE05)" class="w-full px-3 py-2 text-xs border rounded-lg uppercase">
-                            <select id="new-branch" class="w-full px-3 py-2 text-xs border rounded-lg">
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-user-plus mr-1 text-emerald-600"></i> Add New Student</h4>
+                            <input type="text" id="new-name" placeholder="Student Full Name" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <input type="text" id="new-pin" placeholder="PIN Number (e.g., 24CSE05)" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg uppercase">
+                            <select id="new-branch" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
                                 <option value="EEE">EEE</option><option value="CSE">CSE</option><option value="ECE">ECE</option>
                                 <option value="Mechanical">Mechanical</option><option value="Civil">Civil</option><option value="Chemical">Chemical</option>
                             </select>
-                            <button id="btn-add-stu" onclick="window.addStudent()" class="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-emerald-700 transition">Save Student to Database</button>
+                            <button id="btn-add-stu" onclick="window.addStudent()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer transition">Save Student to Database</button>
                         </div>
 
                         <!-- Post Announcement Section -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1 text-indigo-600"></i> Post Live Announcement</h4>
-                            <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border rounded-lg">
-                            <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border rounded-lg"></textarea>
-                            <button id="btn-post-msg" onclick="window.postMessage()" class="w-full bg-indigo-600 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer hover:bg-indigo-700 transition">Broadcast to Cloud</button>
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1 text-indigo-600"></i> Post Live Announcement</h4>
+                            <input type="text" id="msg-title" placeholder="Announcement Title" class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg">
+                            <textarea id="msg-content" placeholder="Message details..." class="w-full px-3 py-2 text-xs border dark:border-slate-700 dark:bg-slate-900 rounded-lg"></textarea>
+                            <button id="btn-post-msg" onclick="window.postMessage()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2.5 rounded-lg font-medium cursor-pointer transition">Broadcast to Cloud</button>
                         </div>
                     </div>
                 `;
@@ -359,9 +388,9 @@
                     else absentCount++;
 
                     attendanceListHtml += `
-                        <div class="p-2.5 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
-                            <span class="font-medium text-slate-700"><i class="fa-solid fa-calendar mr-1 text-blue-500"></i> ${date}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${status === 'Present' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${status}</span>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl flex justify-between items-center text-xs">
+                            <span class="font-medium text-slate-700 dark:text-slate-300"><i class="fa-solid fa-calendar mr-1 text-blue-500"></i> ${date}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${status === 'Present' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300'}">${status}</span>
                         </div>
                     `;
                 }
@@ -383,35 +412,35 @@
                         </div>
 
                         <!-- Attendance Analysis Report Card -->
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-blue-600 mr-1"></i> Attendance Analysis Report</h4>
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-blue-600 mr-1"></i> Attendance Analysis Report</h4>
                             <div class="grid grid-cols-3 gap-2 text-center">
-                                <div class="bg-blue-50 p-3 rounded-xl">
-                                    <p class="text-[10px] text-slate-500 font-medium">Total Classes</p>
-                                    <p class="text-base font-bold text-blue-900">${totalClasses}</p>
+                                <div class="bg-blue-50 dark:bg-slate-900 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Total Classes</p>
+                                    <p class="text-base font-bold text-blue-900 dark:text-blue-300">${totalClasses}</p>
                                 </div>
-                                <div class="bg-emerald-50 p-3 rounded-xl">
-                                    <p class="text-[10px] text-slate-500 font-medium">Days Present</p>
-                                    <p class="text-base font-bold text-emerald-700">${presentCount}</p>
+                                <div class="bg-emerald-50 dark:bg-slate-900 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Days Present</p>
+                                    <p class="text-base font-bold text-emerald-700 dark:text-emerald-400">${presentCount}</p>
                                 </div>
-                                <div class="bg-rose-50 p-3 rounded-xl">
-                                    <p class="text-[10px] text-slate-500 font-medium">Days Absent</p>
-                                    <p class="text-base font-bold text-rose-700">${absentCount}</p>
+                                <div class="bg-rose-50 dark:bg-slate-900 p-3 rounded-xl">
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Days Absent</p>
+                                    <p class="text-base font-bold text-rose-700 dark:text-rose-400">${absentCount}</p>
                                 </div>
                             </div>
                             <div class="space-y-1">
                                 <div class="flex justify-between text-xs font-semibold">
-                                    <span class="text-slate-600">Attendance Percentage</span>
+                                    <span class="text-slate-600 dark:text-slate-300">Attendance Percentage</span>
                                     <span class="${percentage >= 75 ? 'text-emerald-600' : 'text-amber-600'}">${percentage}%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="w-full bg-slate-100 dark:bg-slate-900 h-2 rounded-full overflow-hidden">
                                     <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                            <h4 class="font-semibold text-xs text-slate-700 uppercase tracking-wider">Detailed Daily Logs</h4>
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                            <h4 class="font-semibold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Detailed Daily Logs</h4>
                             <div class="space-y-2 max-h-60 overflow-y-auto">
                                 ${attendanceListHtml}
                             </div>
@@ -421,39 +450,119 @@
             }
         }
 
-        window.filterAttendanceStudents = function() {
+        window.handleEventImageFile = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempEventImageBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.handleGalleryImageFile = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempGalleryImageBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.loadBranchStudentsForAttendance = function() {
             const branch = document.getElementById('att-branch-filter').value;
-            const studentSelect = document.getElementById('att-student-pin');
-            if (!studentSelect) return;
+            const container = document.getElementById('bulk-attendance-container');
+            const submitBtn = document.getElementById('btn-submit-bulk');
+            if (!container) return;
 
             if (!branch) {
-                studentSelect.innerHTML = `<option value="">-- Select Branch Above First --</option>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Select a branch above to view students.</p>`;
+                if (submitBtn) submitBtn.classList.add('hidden');
                 return;
             }
 
-            const filteredStudents = students.filter(s => s.branch === branch);
-            if (filteredStudents.length === 0) {
-                studentSelect.innerHTML = `<option value="">No students found in ${branch}</option>`;
-            } else {
-                studentSelect.innerHTML = `<option value="">Select Student</option>` + 
-                    filteredStudents.map(s => `<option value="${s.pin}">${s.name} (${s.pin})</option>`).join('');
+            const filtered = students.filter(s => s.branch === branch);
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">No students found in ${branch}.</p>`;
+                if (submitBtn) submitBtn.classList.add('hidden');
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(s => {
+                html += `
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border dark:border-slate-700 text-xs">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200">${s.name}</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">${s.pin}</p>
+                        </div>
+                        <select id="bulk-status-${s.pin}" class="px-2 py-1 text-xs border dark:border-slate-600 dark:bg-slate-900 rounded font-semibold text-emerald-600 dark:text-emerald-400">
+                            <option value="Present" selected>Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            if (submitBtn) submitBtn.classList.remove('hidden');
+            container.dataset.branchStudents = JSON.stringify(filtered.map(s => s.pin));
+        };
+
+        window.submitBulkAttendance = async function() {
+            const dateInput = document.getElementById('att-date');
+            const container = document.getElementById('bulk-attendance-container');
+            const btn = document.getElementById('btn-submit-bulk');
+            if (!dateInput || !container || !container.dataset.branchStudents) return;
+
+            const date = dateInput.value;
+            if (!date) {
+                alert('Please pick a date for attendance.');
+                return;
+            }
+
+            const pins = JSON.parse(container.dataset.branchStudents);
+            if (pins.length === 0) return;
+
+            if (btn) btn.disabled = true;
+            try {
+                for (const pin of pins) {
+                    const statusSelect = document.getElementById(`bulk-status-${pin}`);
+                    const status = statusSelect ? statusSelect.value : 'Present';
+                    
+                    const studentDoc = students.find(s => s.pin === pin);
+                    if (studentDoc) {
+                        let updatedAttendance = studentDoc.attendance || {};
+                        updatedAttendance[date] = status;
+                        await updateDoc(doc(db, "students", pin), {
+                            attendance: updatedAttendance
+                        });
+                    }
+                }
+                alert('All students attendance submitted successfully to cloud!');
+            } catch (error) {
+                console.error("Bulk attendance error: ", error);
+                alert('Failed to submit attendance.');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         };
 
         function renderEventsTab(container) {
-            let eventsHtml = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-calendar-star text-purple-600 mr-1"></i> Upcoming Events & Registration</h3>`;
+            let eventsHtml = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700 dark:text-slate-200"><i class="fa-solid fa-calendar-star text-purple-600 mr-1"></i> Upcoming Events & Registration</h3>`;
             if (events.length === 0) {
                 eventsHtml += `<p class="text-xs text-slate-400 text-center py-2">No upcoming events posted yet.</p>`;
             } else {
                 events.forEach(e => {
                     eventsHtml += `
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-2">
-                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-40 object-cover rounded-xl mb-2 border" alt="Event Banner">` : ''}
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-2">
+                            ${e.imageUrl ? `<img src="${e.imageUrl}" class="w-full h-40 object-cover rounded-xl mb-2 border dark:border-slate-700" alt="Event Banner">` : ''}
                             <div class="flex justify-between items-center">
-                                <h4 class="font-bold text-xs text-blue-900">${e.name}</h4>
-                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">${e.date}</span>
+                                <h4 class="font-bold text-xs text-blue-900 dark:text-blue-300">${e.name}</h4>
+                                <span class="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-medium">${e.date}</span>
                             </div>
-                            <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue} | <i class="fa-solid fa-clock ml-1"></i> ${e.time}</p>
                             ${e.link ? `<a href="${e.link}" target="_blank" class="inline-block mt-1 bg-blue-600 text-white text-[10px] px-3 py-2 rounded-lg font-medium hover:bg-blue-700 transition w-full text-center"><i class="fa-solid fa-external-link-alt mr-1"></i> Register / Open Event Website Link</a>` : ''}
                         </div>
                     `;
@@ -461,16 +570,16 @@
             }
             eventsHtml += `</div>`;
 
-            let galleryHtml = `<div class="space-y-3 mt-6"><h3 class="font-bold text-sm text-slate-700"><i class="fa-solid fa-images text-amber-600 mr-1"></i> Event Photo Gallery & Proofs</h3>`;
+            let galleryHtml = `<div class="space-y-3 mt-6"><h3 class="font-bold text-sm text-slate-700 dark:text-slate-200"><i class="fa-solid fa-images text-amber-600 mr-1"></i> Event Photo Gallery & Proofs</h3>`;
             if (gallery.length === 0) {
                 galleryHtml += `<p class="text-xs text-slate-400 text-center py-2">No gallery proofs uploaded yet.</p>`;
             } else {
                 galleryHtml += `<div class="grid grid-cols-2 gap-2">`;
                 gallery.forEach(g => {
                     galleryHtml += `
-                        <div class="bg-white p-2 rounded-xl border shadow-sm space-y-1">
-                            <img src="${g.imageUrl}" class="w-full h-28 object-cover rounded-lg border" alt="Proof Photo">
-                            <p class="text-[11px] font-semibold text-slate-700 truncate">${g.title}</p>
+                        <div class="bg-white dark:bg-slate-800 p-2 rounded-xl border dark:border-slate-700 shadow-sm space-y-1">
+                            <img src="${g.imageUrl}" class="w-full h-28 object-cover rounded-lg border dark:border-slate-700" alt="Proof Photo">
+                            <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate">${g.title}</p>
                         </div>
                     `;
                 });
@@ -482,15 +591,15 @@
         }
 
         function renderMessagesTab(container) {
-            let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700">Notice Board & Announcements</h3>`;
+            let html = `<div class="space-y-3"><h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">Notice Board & Announcements</h3>`;
             if (messages.length === 0) {
                 html += `<p class="text-xs text-slate-400 text-center py-4">No announcements posted yet.</p>`;
             } else {
                 messages.forEach(m => {
                     html += `
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-1">
-                            <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-slate-800">${m.title}</h4><span class="text-[10px] text-slate-400">${m.date}</span></div>
-                            <p class="text-xs text-slate-600">${m.content}</p>
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-1">
+                            <div class="flex justify-between items-center"><h4 class="font-bold text-xs text-slate-800 dark:text-slate-200">${m.title}</h4><span class="text-[10px] text-slate-400">${m.date}</span></div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300">${m.content}</p>
                         </div>
                     `;
                 });
@@ -501,16 +610,16 @@
 
         function renderProfileTab(container) {
             container.innerHTML = `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                    <h3 class="font-bold text-sm text-slate-700">Firebase Student Directory</h3>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 space-y-3">
+                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">Firebase Student Directory</h3>
                     <div class="space-y-2 max-h-96 overflow-y-auto">
                         ${students.map(s => `
-                            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center text-xs">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl flex justify-between items-center text-xs">
                                 <div>
-                                    <p class="font-bold">${s.name}</p>
-                                    <p class="text-[10px] text-slate-500">${s.pin} •${s.branch}</p>
+                                    <p class="font-bold text-slate-800 dark:text-slate-200">${s.name}</p>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">${s.pin} •${s.branch}</p>
                                 </div>
-                                <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px]">Active</span>
+                                <span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded text-[10px]">Active</span>
                             </div>
                         `).join('')}
                     </div>
@@ -555,7 +664,6 @@
             const venue = document.getElementById('ev-venue').value.trim();
             const time = document.getElementById('ev-time').value.trim();
             const link = document.getElementById('ev-link').value.trim();
-            const imageUrl = document.getElementById('ev-img').value.trim();
 
             if (!name || !date || !venue || !time) {
                 alert('Please fill in Name, Date, Venue, and Time.');
@@ -570,15 +678,16 @@
                     venue,
                     time,
                     link,
-                    imageUrl
+                    imageUrl: tempEventImageBase64
                 });
-                alert('Upcoming event with banner & link published successfully!');
+                alert('Upcoming event published successfully!');
                 document.getElementById('ev-name').value = '';
                 document.getElementById('ev-date').value = '';
                 document.getElementById('ev-venue').value = '';
                 document.getElementById('ev-time').value = '';
                 document.getElementById('ev-link').value = '';
-                document.getElementById('ev-img').value = '';
+                document.getElementById('ev-file-input').value = '';
+                tempEventImageBase64 = '';
             } catch (error) {
                 console.error("Error adding event: ", error);
                 alert('Failed to publish event.');
@@ -590,10 +699,9 @@
         window.addGalleryItem = async function() {
             const btn = document.getElementById('btn-add-gal');
             const title = document.getElementById('gal-title').value.trim();
-            const imageUrl = document.getElementById('gal-img').value.trim();
 
-            if (!title || !imageUrl) {
-                alert('Please enter both title and image URL.');
+            if (!title) {
+                alert('Please enter a gallery title.');
                 return;
             }
 
@@ -601,50 +709,15 @@
             try {
                 await addDoc(collection(db, "gallery"), {
                     title,
-                    imageUrl
+                    imageUrl: tempGalleryImageBase64
                 });
-                alert('Event proof/gallery photo uploaded successfully!');
+                alert('Event gallery photo uploaded successfully!');
                 document.getElementById('gal-title').value = '';
-                document.getElementById('gal-img').value = '';
+                document.getElementById('gal-file-input').value = '';
+                tempGalleryImageBase64 = '';
             } catch (error) {
-                console.error("Error uploading gallery item: ", error);
+                console.error("Error uploading gallery: ", error);
                 alert('Failed to upload proof photo.');
-            } finally {
-                if (btn) btn.disabled = false;
-            }
-        };
-
-        window.markAttendance = async function() {
-            const btn = document.getElementById('btn-mark-att');
-            const date = document.getElementById('att-date').value;
-            const pin = document.getElementById('att-student-pin').value;
-            const status = document.getElementById('att-status').value;
-
-            if (!date || !pin) {
-                alert('Please select a branch, student, and date.');
-                return;
-            }
-
-            if (btn) btn.disabled = true;
-            try {
-                const studentRef = doc(db, "students", pin);
-                const studentDoc = students.find(s => s.pin === pin);
-                if (!studentDoc) {
-                    alert('Student not found.');
-                    return;
-                }
-
-                let updatedAttendance = studentDoc.attendance || {};
-                updatedAttendance[date] = status;
-
-                await updateDoc(studentRef, {
-                    attendance: updatedAttendance
-                });
-
-                alert(`Attendance marked as ${status} for ${pin} on ${date}!`);
-            } catch (error) {
-                console.error("Error updating attendance: ", error);
-                alert('Failed to update attendance.');
             } finally {
                 if (btn) btn.disabled = false;
             }
@@ -666,7 +739,7 @@
                     content: content,
                     date: new Date().toISOString().split('T')[0]
                 });
-                alert('Announcement broadcasted to Firebase successfully!');
+                alert('Announcement broadcasted successfully!');
                 document.getElementById('msg-title').value = '';
                 document.getElementById('msg-content').value = '';
             } catch (error) {

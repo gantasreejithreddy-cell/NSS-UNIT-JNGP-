@@ -95,7 +95,17 @@
             </div>
         </div>
     </div>
-        <!-- Firebase SDK & App Logic -->
+
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative animate-scaleUp">
+            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
+            <div id="modal-body" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -561,13 +571,3 @@
     </script>
 </body>
 </html>
-
-
-    <!-- Sign In Modal -->
-    <div id="signin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 relative animate-scaleUp">
-            <button onclick="closeSignInModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            <h3 id="modal-title" class="text-lg font-bold text-slate-800">Sign In</h3>
-            <div id="modal-body" class="space-y-3"></div>
-        </div>
-    </div>

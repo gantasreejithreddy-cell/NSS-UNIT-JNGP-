@@ -29,6 +29,11 @@
         body { font-family: 'Poppins', sans-serif; background-color: #050b14; color: #f8fafc; }
         .glass-box { background: rgba(15, 28, 51, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .glass-box-active { background: rgba(30, 58, 138, 0.25); border: 1px solid rgba(59, 130, 246, 0.5); }
+        @keyframes floatPulse {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.03); }
+        }
+        .welcome-anim { animation: floatPulse 3s ease-in-out infinite; }
     </style>
 </head>
 <body class="min-h-screen pb-24 relative">
@@ -38,7 +43,7 @@
         <header class="flex justify-between items-center py-3 border-b border-slate-800/80 mb-4">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" class="w-full h-full object-cover">
+                    <i class="fa-solid fa-shield-halved text-blue-400"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-xs tracking-wide text-white">NSS UNIT JNGP</h1>
@@ -161,19 +166,20 @@
 
         function renderHome(container) {
             if (!currentUser) {
-                // Exact Landing Page matching Screenshot 12829.jpg
+                // Attractive Animated Welcome Screen (Logos Removed)
                 container.innerHTML = `
-                    <div class="glass-box p-6 rounded-3xl space-y-5 shadow-2xl">
-                        <div class="flex justify-center items-center gap-4 py-2">
-                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" class="w-16 h-16 rounded-full border-2 border-white/20 object-cover bg-white shadow-md">
-                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150" class="w-16 h-16 rounded-full border-2 border-white/20 object-cover bg-white shadow-md">
+                    <div class="glass-box p-6 rounded-3xl space-y-6 shadow-2xl text-center">
+                        <div class="flex justify-center pt-2">
+                            <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/20 welcome-anim">
+                                <i class="fa-solid fa-hands-holding-child text-3xl text-white"></i>
+                            </div>
                         </div>
-                        <div class="text-center space-y-1">
-                            <span class="text-[10px] bg-blue-500/20 text-blue-300 px-3.5 py-1 rounded-full font-semibold tracking-wider">"NOT ME, BUT YOU"</span>
-                            <h2 class="text-2xl font-bold tracking-wide mt-2 text-white">NSS UNIT JNGP</h2>
+                        <div class="space-y-2">
+                            <span class="text-[10px] bg-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full font-semibold tracking-wider uppercase border border-blue-400/30">"NOT ME, BUT YOU"</span>
+                            <h2 class="text-2xl font-bold tracking-wide text-white pt-1">NSS UNIT JNGP</h2>
                             <p class="text-xs text-slate-400">Govt Polytechnic College, Ramanthapur</p>
                         </div>
-                        <p class="text-xs text-slate-300 text-center leading-relaxed px-2">
+                        <p class="text-xs text-slate-300 leading-relaxed px-2">
                             Autonomous volunteer management system logging 240 service hours, departmental attendance tracking, and official certifications.
                         </p>
                         <div class="space-y-3 pt-2">
@@ -189,7 +195,6 @@
                     </div>
                 `;
             } else if (currentUser.role === 'board') {
-                // Exact Dashboard matching Screenshot 12825.jpg
                 container.innerHTML = `
                     <div class="glass-box p-5 rounded-3xl space-y-1">
                         <p class="text-xs text-slate-400">Board Active ${currentUser.designation || 'Technical and financial head'}</p>
@@ -197,6 +202,7 @@
                         <p class="text-xs text-slate-400 pt-0.5">PIN: ${currentUser.pin} • Govt Polytechnic Ramanthapur</p>
                     </div>
 
+                    <!-- Separate Attendance Blocks -->
                     <div class="grid grid-cols-2 gap-3">
                         <div onclick="openSubView('session-attendance')" class="glass-box p-4 rounded-2xl hover:border-blue-500/50 transition cursor-pointer space-y-2">
                             <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-clock text-lg"></i></div>
@@ -220,13 +226,13 @@
                         </div>
                     </div>
 
-                    <!-- Department Student Directory matching Screenshot 12825.jpg & 12815.jpg -->
+                    <!-- Department Student Directory -->
                     <div class="glass-box p-5 rounded-3xl space-y-3">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center"><i class="fa-solid fa-users-rectangle text-lg"></i></div>
                             <div>
                                 <h3 class="font-bold text-sm text-white">Department Student Directory</h3>
-                                <p class="text-[10px] text-slate-400">Explore volunteers across all 8 branches, inspect reports & manage records</p>
+                                <p class="text-[10px] text-slate-400">Board Executive Access: Inspect all student data, PIN & attendance records</p>
                             </div>
                         </div>
                         
@@ -242,9 +248,21 @@
                             `).join('')}
                         </div>
 
-                        <div class="pt-2 border-t border-slate-800 text-center">
-                            <p class="text-xs font-semibold text-slate-300">${selectedBranch} — ${selectedYear}</p>
-                            <p class="text-[10px] text-slate-500 mt-1">${students.filter(s => s.branch === selectedBranch && (s.year || '2nd Year') === selectedYear).length} Registered</p>
+                        <div class="pt-3 border-t border-slate-800 space-y-2 max-h-60 overflow-y-auto">
+                            <p class="text-xs font-semibold text-slate-300 pb-1">${selectedBranch} — ${selectedYear} Records:</p>
+                            ${students.filter(s => s.branch === selectedBranch && (s.year || '2nd Year') === selectedYear).length === 0 ? '<p class="text-xs text-slate-500 text-center py-2">No students found.</p>' : 
+                                students.filter(s => s.branch === selectedBranch && (s.year || '2nd Year') === selectedYear).map(s => {
+                                    let attCount = s.attendance ? Object.values(s.attendance).filter(v => v === 'Present').length : 0;
+                                    return `
+                                        <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 space-y-1">
+                                            <div class="flex justify-between items-center">
+                                                <p class="font-bold text-white text-xs">${s.name}</p>
+                                                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">${attCount} Classes Present</span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400">PIN: <span class="text-blue-400 font-mono font-semibold">${s.pin}</span> • Service Hours: <span class="text-purple-400 font-semibold">${attCount * 3} Hrs</span></p>
+                                        </div>
+                                    `;
+                                }).join('')}
                         </div>
                     </div>
                 `;
@@ -252,8 +270,19 @@
                 let userAtt = currentUser.attendance || {};
                 let totalClasses = Object.keys(userAtt).length;
                 let presentCount = Object.values(userAtt).filter(v => v === 'Present').length;
+                let absentCount = totalClasses - presentCount;
                 let pct = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0;
                 let serviceHours = presentCount * 3;
+
+                let attendanceLogsHtml = '';
+                for (let [date, status] of Object.entries(userAtt)) {
+                    attendanceLogsHtml += `
+                        <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 text-xs">
+                            <span class="text-slate-300"><i class="fa-solid fa-calendar mr-1.5 text-blue-400"></i> ${date}</span>
+                            <span class="px-2.5 py-0.5 rounded text-[10px] font-semibold ${status === 'Present' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${status}</span>
+                        </div>
+                    `;
+                }
 
                 container.innerHTML = `
                     <div class="glass-box p-5 rounded-3xl space-y-2">
@@ -272,12 +301,29 @@
                         </div>
                     </div>
 
-                    <div class="glass-box p-5 rounded-3xl space-y-3">
-                        <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-emerald-400 mr-1"></i> Attendance Metrics</h3>
+                    <div class="glass-box p-5 rounded-3xl space-y-4">
+                        <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-emerald-400 mr-1"></i> Attendance Analysis Graph</h3>
                         <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Total</p><p class="text-base font-bold text-white mt-1">${totalClasses}</p></div>
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Total Drills</p><p class="text-base font-bold text-white mt-1">${totalClasses}</p></div>
                             <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Present</p><p class="text-base font-bold text-emerald-400 mt-1">${presentCount}</p></div>
-                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Ratio</p><p class="text-base font-bold text-blue-400 mt-1">${pct}%</p></div>
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Absent</p><p class="text-base font-bold text-rose-400 mt-1">${absentCount}</p></div>
+                        </div>
+                        <div class="space-y-1.5 pt-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-400">Attendance Ratio Bar</span>
+                                <span class="${pct >= 75 ? 'text-emerald-400' : 'text-amber-400'}">${pct}%</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5 flex">
+                                <div class="bg-emerald-500 h-full rounded-l-full transition-all duration-500" style="width: ${pct}%"></div>
+                                <div class="bg-rose-500 h-full rounded-r-full transition-all duration-500" style="width: ${100 - pct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-box p-5 rounded-3xl space-y-3">
+                        <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-list-check text-blue-400 mr-1"></i> Individual Daily History</h3>
+                        <div class="space-y-2 max-h-52 overflow-y-auto">
+                            ${attendanceLogsHtml || '<p class="text-xs text-slate-500 text-center py-3">No attendance logged yet.</p>'}
                         </div>
                     </div>
                 `;
@@ -286,14 +332,13 @@
 
         function renderSubViewContent(container) {
             if (currentSubView === 'session-attendance') {
-                // Exact match for Screenshot 12821.jpg & 12823.jpg
                 container.innerHTML = `
                     <div class="glass-box p-5 rounded-3xl space-y-4">
                         <div class="flex items-center gap-3">
                             <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
                             <div>
-                                <h3 class="font-bold text-sm text-white">Create Session Attendance</h3>
-                                <p class="text-[10px] text-slate-400">Configure session & mark roster</p>
+                                <h3 class="font-bold text-sm text-white">Session Attendance</h3>
+                                <p class="text-[10px] text-slate-400">Configure weekly drills & mark roster</p>
                             </div>
                         </div>
                         
@@ -339,20 +384,19 @@
                     <div class="glass-box p-5 rounded-3xl space-y-4">
                         <div class="flex items-center gap-3">
                             <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
-                            <div><h3 class="font-bold text-sm text-white">Event Attendance</h3><p class="text-[10px] text-slate-400">Special camps & rallies</p></div>
+                            <div><h3 class="font-bold text-sm text-white">Event Attendance</h3><p class="text-[10px] text-slate-400">Special camps & rallies participation</p></div>
                         </div>
                         <div class="space-y-2">
                             ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events posted.</p>' : events.map(e => `
                                 <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center">
                                     <div><h4 class="font-bold text-xs text-white">${e.name}</h4><p class="text-[10px] text-slate-400">${e.date} •${e.venue}</p></div>
-                                    <button onclick="alert('Event attendance logged!')" class="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-3 py-1.5 rounded-xl font-medium cursor-pointer">Log Camp</button>
+                                    <button onclick="alert('Camp attendance logged successfully!')" class="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-3 py-1.5 rounded-xl font-medium cursor-pointer">Log Camp</button>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
             } else if (currentSubView === 'register-student') {
-                // Exact match for Screenshot 12817.jpg
                 container.innerHTML = `
                     <div class="glass-box p-5 rounded-3xl space-y-4">
                         <div class="flex items-center gap-3">
@@ -405,15 +449,8 @@
             }
         }
 
-        window.setDirectoryBranch = function(b) {
-            selectedBranch = b;
-            renderUI();
-        };
-
-        window.setDirectoryYear = function(y) {
-            selectedYear = y;
-            renderUI();
-        };
+        window.setDirectoryBranch = function(b) { selectedBranch = b; renderUI(); };
+        window.setDirectoryYear = function(y) { selectedYear = y; renderUI(); };
 
         window.selectAttendanceBranch = function(b) {
             selectedBranch = b;
@@ -470,10 +507,7 @@
                 }
                 alert('Attendance successfully recorded!');
                 closeSubView();
-            } catch(e) {
-                console.error(e);
-                alert('Failed to save attendance.');
-            }
+            } catch(e) { alert('Failed to save attendance.'); }
         };
 
         window.registerStudentAction = async function() {
@@ -486,9 +520,7 @@
                 await setDoc(doc(db, "students", pin), { name, pin, branch, year, attendance: {} });
                 alert('Student successfully registered!');
                 closeSubView();
-            } catch(e) {
-                alert('Registration failed.');
-            }
+            } catch(e) { alert('Registration failed.'); }
         };
 
         window.broadcastNoticeAction = async function() {
@@ -496,7 +528,13 @@
             const content = document.getElementById('notice-content').value.trim();
             if(!title || !content) return alert('Fill all fields.');
             try {
-                await addDoc(collection(db, "messages"), { title, content, date: new Date().toISOString().split('T')[0] });
+                const senderName = currentUser ? `${currentUser.name} (${currentUser.designation || 'Board Member'})` : 'Board Administration';
+                await addDoc(collection(db, "messages"), { 
+                    title, 
+                    content, 
+                    sender: senderName,
+                    date: new Date().toISOString().split('T')[0] 
+                });
                 alert('Notice broadcasted successfully!');
                 closeSubView();
             } catch(e) { alert('Broadcast failed.'); }
@@ -524,9 +562,12 @@
                     <h2 class="text-base font-bold text-white"><i class="fa-solid fa-bullhorn text-amber-400 mr-2"></i> Notice Board</h2>
                     <div class="space-y-3">
                         ${messages.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No active notices.</p>' : messages.map(m => `
-                            <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
+                            <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="flex justify-between items-center"><h3 class="font-bold text-xs text-white">${m.title}</h3><span class="text-[10px] text-slate-500">${m.date}</span></div>
                                 <p class="text-xs text-slate-300">${m.content}</p>
+                                <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[10px]">
+                                    <span class="text-blue-400 font-medium"><i class="fa-solid fa-user-shield mr-1"></i> Broadcasted by: ${m.sender || 'Board Administration'}</span>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -536,7 +577,6 @@
 
         function renderProfile(container) {
             if(!currentUser) return container.innerHTML = `<div class="glass-box p-6 rounded-3xl text-center"><p class="text-xs text-slate-400">Please sign in.</p></div>`;
-            // Exact match for Screenshot 12819.jpg
             container.innerHTML = `
                 <div class="glass-box p-5 rounded-3xl space-y-4">
                     <h2 class="text-base font-bold text-white"><i class="fa-solid fa-id-card text-blue-400 mr-2"></i> User Identity & Profile</h2>
@@ -549,7 +589,6 @@
             `;
         }
 
-        // Exact match for Screenshot 12827.jpg
         window.openBoardLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">

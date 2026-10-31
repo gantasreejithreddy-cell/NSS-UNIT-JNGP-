@@ -338,8 +338,12 @@
                             <div><h3 class="font-bold text-sm text-white">Session Attendance</h3><p class="text-[10px] text-slate-400">Mark Present/Absent simultaneously</p></div>
                         </div>
                         <div class="space-y-3">
+                            <label class="text-[10px] text-slate-400 font-semibold block">SESSION TITLE / NAME</label>
+                            <input type="text" id="sess-title" placeholder="e.g. Session 1: Cleanliness Drive" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+
                             <label class="text-[10px] text-slate-400 font-semibold block">DATE</label>
                             <input type="date" id="sess-date" value="${new Date().toISOString().split('T')[0]}" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+
                             <label class="text-[10px] text-slate-400 font-semibold block">SELECT BRANCH:</label>
                             <div class="grid grid-cols-4 gap-2">
                                 ${['CIVIL', 'MECH', 'EEE', 'ECE', 'CHEM', 'MET', 'PKG', 'AME'].map(b => `
@@ -411,12 +415,13 @@
 
         window.submitAttendanceBatch = async function() {
             const date = document.getElementById('sess-date').value;
+            const title = document.getElementById('sess-title')?.value || 'Weekly Session';
             const filtered = students.filter(s => s.branch === selectedBranch);
             try {
                 for(let s of filtered) {
                     const sel = document.getElementById(`status-${s.pin}`);
                     let att = s.attendance || {};
-                    att[date] = sel ? sel.value : 'Present';
+                    att[`${date} (${title})`] = sel ? sel.value : 'Present';
                     await updateDoc(doc(db, "students", s.pin), { attendance: att });
                 }
                 alert('Attendance successfully recorded!');
@@ -594,7 +599,6 @@
             const name = document.getElementById('login-name').value.trim();
             const pin = document.getElementById('login-pin').value.trim();
             const desig = document.getElementById('login-desig').value.trim();
-            // Secret PIN changed to 1029
             if (pass === '1029' && name && pin) {
                 currentUser = { role: 'board', name: name, pin: pin, designation: desig || 'Board Executive' };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
@@ -615,7 +619,6 @@
         window.verifyDeveloperLogin = function() {
             const pin = document.getElementById('dev-pin').value.trim().toUpperCase();
             const pass = document.getElementById('dev-pass').value;
-            // Secret PIN changed to 1029
             if(authorizedDevelopers.includes(pin) && pass === '1029') {
                 currentUser = { role: 'developer', name: 'Lead System Developer', pin: pin };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));

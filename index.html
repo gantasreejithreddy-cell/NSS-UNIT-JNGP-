@@ -26,24 +26,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #050b14; color: #f8fafc; }
-        .glass-box { background: rgba(15, 28, 51, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-box-active { background: rgba(30, 58, 138, 0.25); border: 1px solid rgba(59, 130, 246, 0.5); }
+        body { font-family: 'Poppins', sans-serif; background-color: #050b14; color: #f8fafc; overflow-x: hidden; }
+        .glass-box { background: rgba(15, 28, 51, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass-box:hover { border-color: rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
+        .glass-box-active { background: rgba(30, 58, 138, 0.3); border: 1px solid rgba(59, 130, 246, 0.6); }
         @keyframes floatPulse {
             0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-8px) scale(1.03); }
+            50% { transform: translateY(-6px) scale(1.02); }
         }
-        .welcome-anim { animation: floatPulse 3s ease-in-out infinite; }
+        .welcome-anim { animation: floatPulse 3.5s ease-in-out infinite; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
     </style>
 </head>
 <body class="min-h-screen pb-24 relative">
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col justify-between p-4">
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col justify-between p-4 fade-in">
         
         <!-- Top Header -->
         <header class="flex justify-between items-center py-3 border-b border-slate-800/80 mb-4">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
-                    <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-shield-halved text-white text-sm"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-xs tracking-wide text-white">NSS UNIT JNGP</h1>
@@ -57,18 +63,18 @@
         <main id="main-container" class="flex-1 space-y-4 pb-16"></main>
 
         <!-- Bottom Navigation Bar -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#071120] border-t border-slate-800/80 flex justify-around py-3 px-2 z-30 shadow-2xl">
-            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-500 text-xs font-semibold cursor-pointer">
-                <i class="fa-solid fa-house text-lg"></i> Home
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#071120]/95 backdrop-blur-md border-t border-slate-800/80 flex justify-around py-3 px-2 z-30 shadow-2xl">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-500 text-xs font-semibold cursor-pointer transition hover:text-blue-400">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i> Home
             </button>
-            <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer">
-                <i class="fa-solid fa-calendar-days text-lg"></i> Events & Gallery
+            <button onclick="switchTab('events')" id="nav-events" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer transition hover:text-slate-300">
+                <i class="fa-solid fa-calendar-days text-lg mb-0.5"></i> Events & Gallery
             </button>
-            <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer">
-                <i class="fa-solid fa-bullhorn text-lg"></i> Notice Board
+            <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer transition hover:text-slate-300">
+                <i class="fa-solid fa-bullhorn text-lg mb-0.5"></i> Notice Board
             </button>
-            <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer">
-                <i class="fa-solid fa-id-card text-lg"></i> Profile & ID
+            <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer transition hover:text-slate-300">
+                <i class="fa-solid fa-id-card text-lg mb-0.5"></i> Profile & ID
             </button>
         </nav>
     </div>
@@ -100,12 +106,9 @@
         let events = [];
         let gallery = [];
         let suggestions = [];
-        let editRequests = [];
-        let auditLogs = [];
         let currentTab = 'home';
         let currentSubView = null; 
         let selectedBranch = 'CIVIL';
-        let selectedYear = '2nd Year';
         const authorizedDevelopers = ["DEV-001", "DEV-002", "DEV-003"];
 
         function initSync() {
@@ -129,14 +132,6 @@
                 suggestions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderUI();
             });
-            onSnapshot(collection(db, "edit_requests"), snap => {
-                editRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderUI();
-            });
-            onSnapshot(collection(db, "audit_logs"), snap => {
-                auditLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderUI();
-            });
         }
 
         initSync();
@@ -146,7 +141,7 @@
             currentSubView = null;
             ['home', 'events', 'messages', 'profile'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
-                if(btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-500 text-xs font-semibold cursor-pointer' : 'flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer';
+                if(btn) btn.className = t === tab ? 'flex flex-col items-center text-blue-500 text-xs font-semibold cursor-pointer transition' : 'flex flex-col items-center text-slate-500 text-xs font-medium cursor-pointer transition hover:text-slate-300';
             });
             renderUI();
         };
@@ -170,7 +165,7 @@
                 if (currentUser.role === 'developer') subTitle.innerText = `Developer Admin (${currentUser.pin})`;
                 else if (currentUser.role === 'board') subTitle.innerText = `${currentUser.designation || 'Board Executive'} (${currentUser.pin})`;
                 else subTitle.innerText = `${currentUser.branch} Student (${currentUser.pin})`;
-                headerAction.innerHTML = `<button onclick="logout()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs px-3 py-1.5 rounded-xl border border-rose-500/30 transition cursor-pointer flex items-center gap-1.5"><i class="fa-solid fa-arrow-right-from-bracket"></i> Exit</button>`;
+                headerAction.innerHTML = `<button onclick="logout()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs px-3 py-1.5 rounded-xl border border-rose-500/30 transition cursor-pointer flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Exit</button>`;
             } else {
                 subTitle.innerText = 'Govt Polytechnic Ramanthapur';
                 headerAction.innerHTML = '';
@@ -190,7 +185,7 @@
         function renderHome(container) {
             if (!currentUser) {
                 container.innerHTML = `
-                    <div class="glass-box p-6 rounded-3xl space-y-5 shadow-2xl text-center">
+                    <div class="glass-box p-6 rounded-3xl space-y-6 shadow-2xl text-center fade-in">
                         <div class="flex justify-center pt-2">
                             <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/20 welcome-anim">
                                 <i class="fa-solid fa-hands-holding-child text-3xl text-white"></i>
@@ -213,30 +208,18 @@
                                 <div class="flex items-center gap-3"><i class="fa-solid fa-graduation-cap text-lg text-purple-400"></i> <span class="text-sm">Student Sign In</span></div>
                                 <i class="fa-solid fa-arrow-right"></i>
                             </button>
-                            <button onclick="openDeveloperLoginModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 px-6 rounded-2xl shadow-lg transition flex items-center justify-between cursor-pointer border border-slate-700">
-                                <div class="flex items-center gap-3"><i class="fa-solid fa-code text-lg text-emerald-400"></i> <span class="text-sm">Developer Login</span></div>
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </button>
                         </div>
-                    </div>
-                `;
-            } else if (currentUser.role === 'developer') {
-                container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-2 border border-emerald-500/40">
-                        <p class="text-xs text-emerald-400 font-semibold">Developer Control Center</p>
-                        <h2 class="text-xl font-bold text-white">${currentUser.name}</h2>
-                        <p class="text-xs text-slate-400">Authorized System Developer</p>
                     </div>
                 `;
             } else if (currentUser.role === 'board') {
                 container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-1">
+                    <div class="glass-box p-5 rounded-3xl space-y-1 fade-in">
                         <p class="text-xs text-slate-400">Board Executive Member</p>
                         <h2 class="text-xl font-bold text-white">${currentUser.name}</h2>
                         <p class="text-xs text-slate-400 pt-0.5">PIN: ${currentUser.pin} • ${currentUser.designation}</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-3 fade-in">
                         <div onclick="openSubView('session-attendance')" class="glass-box p-4 rounded-2xl hover:border-blue-500/50 transition cursor-pointer space-y-2">
                             <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-clock text-lg"></i></div>
                             <h3 class="font-bold text-sm text-white">Session Attendance</h3>
@@ -259,7 +242,7 @@
                         </div>
                     </div>
 
-                    <div class="glass-box p-5 rounded-3xl space-y-3">
+                    <div class="glass-box p-5 rounded-3xl space-y-3 fade-in">
                         <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-table text-emerald-400"></i> Attendance Reports & Table Downloads</h3>
                         <div class="grid grid-cols-3 gap-2">
                             <button onclick="window.downloadReport('session')" class="glass-box p-2.5 rounded-xl text-[10px] font-semibold text-blue-300 hover:bg-blue-600/20 transition cursor-pointer">Session Table</button>
@@ -279,13 +262,13 @@
                 let isEligible = combinedTotalHours >= 240;
 
                 container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-2">
+                    <div class="glass-box p-5 rounded-3xl space-y-2 fade-in">
                         <p class="text-xs text-purple-300">Student Volunteer Dashboard</p>
                         <h2 class="text-xl font-bold text-white">${currentUser.name}</h2>
                         <p class="text-xs text-slate-400">PIN: ${currentUser.pin} • Branch: ${currentUser.branch}</p>
                     </div>
 
-                    <div class="glass-box p-4 rounded-2xl flex items-center justify-between border ${isEligible ? 'border-emerald-500 bg-emerald-950/30' : 'border-amber-500/40 bg-amber-950/20'}">
+                    <div class="glass-box p-4 rounded-2xl flex items-center justify-between border ${isEligible ? 'border-emerald-500 bg-emerald-950/30' : 'border-amber-500/40 bg-amber-950/20'} fade-in">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl ${isEligible ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'} flex items-center justify-center text-lg">
                                 <i class="fa-solid fa-award"></i>
@@ -297,7 +280,17 @@
                         </div>
                     </div>
 
-                    <button onclick="openIdCardModal()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer border border-blue-400/30">
+                    <div class="glass-box p-5 rounded-3xl space-y-4 border border-blue-500/30 fade-in">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-hourglass-half text-blue-400 mr-1"></i> 240-Hour Goal</h3>
+                            <span class="text-xs font-bold text-blue-400">${combinedTotalHours} / 240 Hrs</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-700" style="width: ${Math.min(100, combinedPct)}%"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="openIdCardModal()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer border border-blue-400/30 fade-in">
                         <i class="fa-solid fa-id-badge text-lg"></i> <span>View Digital ID Card</span>
                     </button>
                 `;
@@ -312,7 +305,7 @@
             let total = sessionHours + eventHours;
 
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-blue-500/40 shadow-2xl text-center">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <div class="flex items-center justify-center gap-2 pb-1 border-b border-slate-800">
@@ -339,7 +332,7 @@
         function renderSubViewContent(container) {
             if (currentSubView === 'session-attendance') {
                 container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-4">
+                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                         <div class="flex items-center gap-3">
                             <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
                             <div><h3 class="font-bold text-sm text-white">Session Attendance</h3><p class="text-[10px] text-slate-400">Mark Present/Absent simultaneously</p></div>
@@ -360,7 +353,7 @@
                 window.selectAttendanceBranch(selectedBranch);
             } else if (currentSubView === 'register-student') {
                 container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-4">
+                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                         <div class="flex items-center gap-3">
                             <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
                             <div><h3 class="font-bold text-sm text-white">Student Registration</h3><p class="text-[10px] text-slate-400">Manual onboarding</p></div>
@@ -377,7 +370,7 @@
                 `;
             } else if (currentSubView === 'broadcast-notice') {
                 container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-4">
+                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                         <div class="flex items-center gap-3">
                             <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
                             <div><h3 class="font-bold text-sm text-white">Broadcast Notice</h3><p class="text-[10px] text-slate-400">Push live announcements</p></div>
@@ -392,7 +385,6 @@
             }
         }
 
-        // Simultaneous Present / Absent Selector for Roster
         window.selectAttendanceBranch = function(b) {
             selectedBranch = b;
             document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-600/20'));
@@ -458,7 +450,7 @@
 
         function renderEvents(container) {
             container.innerHTML = `
-                <div class="glass-box p-5 rounded-3xl space-y-4">
+                <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                     <h2 class="text-base font-bold text-white"><i class="fa-solid fa-calendar-days text-purple-400 mr-2"></i> Upcoming Events</h2>
                     <div class="space-y-3">
                         ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events.</p>' : events.map(e => `
@@ -469,14 +461,14 @@
                         `).join('')}
                     </div>
                 </div>
-                <div class="glass-box p-5 rounded-3xl space-y-3 mt-4">
+                <div class="glass-box p-5 rounded-3xl space-y-3 mt-4 fade-in">
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-images text-amber-400"></i> Event Proof Gallery</h3>
                         ${currentUser && currentUser.role === 'board' ? `<button onclick="window.uploadGalleryPhotoPrompt()" class="bg-amber-600/30 text-amber-300 text-[10px] px-2.5 py-1 rounded-lg">Upload Photo</button>` : ''}
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         ${gallery.length === 0 ? '<p class="text-xs text-slate-500 text-center col-span-2 py-3">No activity snapshots.</p>' : gallery.map(g => `
-                            <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800 space-y-1">
+                            <div class="glass-box p-2 rounded-xl space-y-1">
                                 <img src="${g.url}" class="w-full h-28 object-cover rounded-lg">
                                 <p class="text-[10px] font-semibold text-white truncate">${g.title}</p>
                             </div>
@@ -497,7 +489,7 @@
 
         function renderMessages(container) {
             container.innerHTML = `
-                <div class="glass-box p-5 rounded-3xl space-y-4">
+                <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                     <div class="flex justify-between items-center">
                         <h2 class="text-base font-bold text-white"><i class="fa-solid fa-bullhorn text-amber-400 mr-2"></i> Notice Board</h2>
                         ${currentUser && currentUser.role === 'student' ? `<button onclick="window.openSuggestionModal()" class="bg-purple-600/30 text-purple-300 text-[10px] px-2.5 py-1 rounded-lg">Suggestion Box</button>` : ''}
@@ -520,7 +512,7 @@
 
         window.openSuggestionModal = function() {
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-3 relative border border-purple-500/40 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-base font-bold text-white">Student Suggestion Box</h3>
@@ -543,7 +535,7 @@
         function renderProfile(container) {
             if(!currentUser) return container.innerHTML = `<div class="glass-box p-6 rounded-3xl text-center"><p class="text-xs text-slate-400">Please sign in.</p></div>`;
             container.innerHTML = `
-                <div class="glass-box p-5 rounded-3xl space-y-4">
+                <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                     <h2 class="text-base font-bold text-white"><i class="fa-solid fa-id-card text-blue-400 mr-2"></i> User Identity & Profile</h2>
                     <div class="space-y-3">
                         <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400 font-semibold">ROLE</p><p class="text-sm font-bold text-white mt-0.5">${currentUser.role === 'developer' ? 'System Developer' : (currentUser.role === 'board' ? currentUser.designation || 'Board Executive' : 'Student Volunteer')}</p></div>
@@ -556,11 +548,11 @@
 
         window.openBoardLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-slate-700 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-base font-bold text-white">Board Executive Access</h3>
-                        <input type="password" id="login-passcode" placeholder="Secret Passcode (1947)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <input type="password" id="login-passcode" placeholder="Enter Secret Passcode" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <input type="text" id="login-name" placeholder="Board Member Full Name" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <input type="text" id="login-pin" placeholder="Board Member PIN" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <input type="text" id="login-desig" placeholder="Official Designation" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
@@ -572,7 +564,7 @@
 
         window.openStudentLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-slate-700 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-base font-bold text-white">Student Sign In</h3>
@@ -585,12 +577,12 @@
 
         window.openDeveloperLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-emerald-500/40 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-base font-bold text-white">Developer Login</h3>
                         <input type="text" id="dev-pin" placeholder="Developer PIN (DEV-001)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
-                        <input type="password" id="dev-pass" placeholder="Secret Key (1947)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <input type="password" id="dev-pass" placeholder="Enter Secret Key" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <button onclick="window.verifyDeveloperLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Access</button>
                     </div>
                 </div>
@@ -602,7 +594,8 @@
             const name = document.getElementById('login-name').value.trim();
             const pin = document.getElementById('login-pin').value.trim();
             const desig = document.getElementById('login-desig').value.trim();
-            if (pass === '1947' && name && pin) {
+            // Secret PIN changed to 1029
+            if (pass === '1029' && name && pin) {
                 currentUser = { role: 'board', name: name, pin: pin, designation: desig || 'Board Executive' };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
@@ -621,7 +614,9 @@
 
         window.verifyDeveloperLogin = function() {
             const pin = document.getElementById('dev-pin').value.trim().toUpperCase();
-            if(authorizedDevelopers.includes(pin) && document.getElementById('dev-pass').value === '1947') {
+            const pass = document.getElementById('dev-pass').value;
+            // Secret PIN changed to 1029
+            if(authorizedDevelopers.includes(pin) && pass === '1029') {
                 currentUser = { role: 'developer', name: 'Lead System Developer', pin: pin };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
@@ -631,7 +626,6 @@
         window.closeModal = function() { document.getElementById('modal-container').innerHTML = ''; };
         window.logout = function() { currentUser = null; localStorage.removeItem('nss_current_user'); renderUI(); };
         
-        // Table-Form Downloadable Reports
         window.downloadReport = function(type) {
             let csv = "PIN | Student Name | Branch | Total Hours\n";
             csv += "----------------------------------------\n";

@@ -39,8 +39,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .fade-in { animation: fadeIn 0.4s ease forwards; }
-        .dot-node { width: 36px; height: 36px; border-radius: 50%; background: #1e293b; border: 2px solid #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 11px; color: #94a3b8; }
-        .dot-node.active { background: #3b82f6; border-color: #60a5fa; color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
 <body class="min-h-screen pb-24 relative">
@@ -103,7 +101,6 @@
 
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
         let students = [];
-        let boardMembers = [];
         let messages = [];
         let events = [];
         let gallery = [];
@@ -117,10 +114,6 @@
         function initSync() {
             onSnapshot(collection(db, "students"), snap => {
                 students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderUI();
-            });
-            onSnapshot(collection(db, "board_members"), snap => {
-                boardMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderUI();
             });
             onSnapshot(collection(db, "messages"), snap => {
@@ -173,8 +166,8 @@
             const container = document.getElementById('main-container');
 
             if (currentUser) {
-                if (currentUser.role === 'developer') subTitle.innerText = `Developer Admin (${currentUser.pin})`;
-                else if (currentUser.role === 'board') subTitle.innerText = `${currentUser.designation || 'Board Executive'} (${currentUser.pin})`;
+                if (currentUser.role === 'developer') subTitle.innerText = `Developer Admin`;
+                else if (currentUser.role === 'board') subTitle.innerText = `Board Executive (${currentUser.pin})`;
                 else subTitle.innerText = `${currentUser.branch} Student (${currentUser.pin})`;
                 headerAction.innerHTML = `<button onclick="logout()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs px-3 py-1.5 rounded-xl border border-rose-500/30 transition cursor-pointer flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Exit</button>`;
             } else {
@@ -232,22 +225,14 @@
                         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                             <div>
                                 <p class="text-xs text-emerald-400 font-semibold">Developer Control Center</p>
-                                <h2 class="text-xl font-bold text-white">${currentUser.name} (${currentUser.pin})</h2>
+                                <h2 class="text-xl font-bold text-white">${currentUser.name}</h2>
                             </div>
                             <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">Active Admin</span>
                         </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="glass-box p-4 rounded-2xl space-y-2">
-                                <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-users-gear text-blue-400"></i> Board Members Management</h3>
-                                <p class="text-[10px] text-slate-400">Manage, review, or suspend board member accounts.</p>
-                                <button onclick="openSubView('manage-board')" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 py-2 rounded-xl text-xs font-semibold border border-blue-500/30 transition">Manage Board</button>
-                            </div>
-                            <div class="glass-box p-4 rounded-2xl space-y-2">
-                                <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> System Audit Logs</h3>
-                                <p class="text-[10px] text-slate-400">Monitor all attendance modifications and actions.</p>
-                                <button onclick="openSubView('audit-logs')" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 py-2 rounded-xl text-xs font-semibold border border-amber-500/30 transition">View Audit Logs</button>
-                            </div>
+                        <div class="glass-box p-4 rounded-2xl space-y-2">
+                            <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> System Audit Logs</h3>
+                            <p class="text-[10px] text-slate-400">Monitor all attendance modifications and actions.</p>
+                            <button onclick="openSubView('audit-logs')" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 py-2 rounded-xl text-xs font-semibold border border-amber-500/30 transition">View Audit Logs</button>
                         </div>
                     </div>
                 `;
@@ -436,26 +421,6 @@
                         </div>
                     </div>
                 `;
-            } else if (currentSubView === 'manage-board') {
-                container.innerHTML = `
-                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
-                        <div class="flex items-center gap-3">
-                            <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
-                            <div><h3 class="font-bold text-sm text-white">Manage Board Members</h3><p class="text-[10px] text-slate-400">Developer Control Panel</p></div>
-                        </div>
-                        <div class="space-y-2 max-h-72 overflow-y-auto">
-                            ${boardMembers.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No registered board members.</p>' : boardMembers.map(bm => `
-                                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                    <div>
-                                        <p class="font-bold text-white">${bm.name}</p>
-                                        <p class="text-[10px] text-slate-400">PIN: ${bm.pin} • ${bm.designation}</p>
-                                    </div>
-                                    <button onclick="window.removeBoardMember('${bm.pin}')" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 px-3 py-1 rounded-lg text-[10px]">Remove</button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
             } else if (currentSubView === 'audit-logs') {
                 container.innerHTML = `
                     <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
@@ -541,23 +506,42 @@
             } catch(e) { alert('Failed to broadcast notice.'); }
         };
 
-        window.removeBoardMember = async function(pin) {
-            if(confirm(`Remove board member account ${pin}?`)) {
+        // Notice and Event Management Actions
+        window.deleteNotice = async function(id) {
+            if(confirm("Are you sure you want to remove this notice?")) {
                 try {
-                    await deleteDoc(doc(db, "board_members", pin));
-                    alert('Board member removed.');
-                } catch(e) { alert('Action failed.'); }
+                    await deleteDoc(doc(db, "messages", id));
+                    alert("Notice removed.");
+                } catch(e) { alert("Failed to delete notice."); }
+            }
+        };
+
+        window.deleteEvent = async function(id) {
+            if(confirm("Are you sure you want to remove this event?")) {
+                try {
+                    await deleteDoc(doc(db, "events", id));
+                    alert("Event removed.");
+                } catch(e) { alert("Failed to delete event."); }
             }
         };
 
         function renderEvents(container) {
             container.innerHTML = `
                 <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
-                    <h2 class="text-base font-bold text-white"><i class="fa-solid fa-calendar-days text-purple-400 mr-2"></i> Upcoming Events</h2>
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-base font-bold text-white"><i class="fa-solid fa-calendar-days text-purple-400 mr-2"></i> Upcoming Events</h2>
+                        ${currentUser && currentUser.role === 'board' ? `<button onclick="window.createEventPrompt()" class="bg-purple-600/30 text-purple-300 text-[10px] px-2.5 py-1 rounded-lg">Add Event</button>` : ''}
+                    </div>
                     <div class="space-y-3">
-                        ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events scheduled.</p>' : events.map(e => `
+                        ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events scheduled.</p>': events.map(e => `
                             <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
-                                <div class="flex justify-between items-center"><h3 class="font-bold text-xs text-white">${e.name}</h3><span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">${e.date}</span></div>
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-xs text-white">${e.name}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">${e.date}</span>
+                                        ${currentUser && currentUser.role === 'board' ? `<button onclick="window.deleteEvent('${e.id}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                                    </div>
+                                </div>
                                 <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue}</p>
                             </div>
                         `).join('')}
@@ -580,6 +564,16 @@
             `;
         }
 
+        window.createEventPrompt = async function() {
+            const name = prompt("Enter Event Name:");
+            const venue = prompt("Enter Venue:");
+            const date = prompt("Enter Date (YYYY-MM-DD):");
+            if(name && date) {
+                await addDoc(collection(db, "events"), { name, venue: venue || 'Campus', date, hours: 3 });
+                alert("Event created successfully!");
+            }
+        };
+
         window.uploadGalleryPhotoPrompt = async function() {
             const title = prompt("Enter activity title:");
             const url = prompt("Enter image URL:");
@@ -599,7 +593,13 @@
                     <div class="space-y-3">
                         ${messages.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No active notices.</p>' : messages.map(m => `
                             <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
-                                <div class="flex justify-between items-center"><h3 class="font-bold text-xs text-white">${m.title}</h3><span class="text-[10px] text-slate-500">${m.date}</span></div>
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-xs text-white">${m.title}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-slate-500">${m.date}</span>
+                                        ${currentUser && currentUser.role === 'board' ? `<button onclick="window.deleteNotice('${m.id}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                                    </div>
+                                </div>
                                 <p class="text-xs text-slate-300">${m.content}</p>
                                 <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[10px]">
                                     <span class="text-blue-400"><i class="fa-solid fa-user-shield mr-1"></i> ${m.sender || 'Board'}</span>
@@ -648,7 +648,7 @@
             `;
         }
 
-        // Requirement 10: Persistent Board Member Registration & Login Flow
+        // Requirement 10 & User Prompt: Persistent Roster & Name Set as DVP, PIN as 1029
         window.openBoardLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
@@ -656,8 +656,8 @@
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-base font-bold text-white">Board Member Portal</h3>
                         <p class="text-xs text-slate-400">Enter your permanent PIN to log in or register once.</p>
-                        <input type="text" id="board-login-pin" placeholder="Enter PIN (e.g. 25500)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
-                        <input type="text" id="board-login-name" placeholder="Full Name (for new registration)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <input type="text" id="board-login-pin" placeholder="Enter PIN (e.g. 1029)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
+                        <input type="text" id="board-login-name" value="DVP" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <input type="text" id="board-login-desig" placeholder="Designation (e.g. ECE 26)" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                         <button onclick="window.verifyOrRegisterBoard()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Login / Register</button>
                     </div>
@@ -671,6 +671,12 @@
             const desig = document.getElementById('board-login-desig').value.trim();
             if(!pin) return alert('Please enter your PIN.');
 
+            // Verify secret PIN requirement (1029)
+            if(pin !== '1029') {
+                alert('Invalid Board PIN! (Hint: 1029)');
+                return;
+            }
+
             const docRef = doc(db, "board_members", pin);
             const snap = await getDoc(docRef);
 
@@ -679,8 +685,7 @@
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
             } else {
-                if(!name) return alert('Name is required for first-time registration.');
-                const newBoard = { name, pin, designation: desig || 'Board Executive', role: 'board' };
+                const newBoard = { name: name || 'DVP', pin, designation: desig || 'Board Executive', role: 'board' };
                 await setDoc(docRef, newBoard);
                 currentUser = newBoard;
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
@@ -711,71 +716,33 @@
             } else alert('Student PIN not found in database.');
         };
 
-        // Requirement 6: Developer Login with 3x3 Dot-Pattern Verification
-        let dotPatternSequence = [];
         window.openDeveloperLoginModal = function() {
-            dotPatternSequence = [];
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
-                    <div class="glass-box w-full max-w-md rounded-3xl p-6 space-y-4 relative border border-emerald-500/40 shadow-2xl">
+                    <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-emerald-500/40 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                        <h3 class="text-base font-bold text-white">Developer Secure Login</h3>
-                        <p class="text-xs text-slate-400">Step 1: Enter ID & Password | Step 2: Complete 'N' Dot Pattern</p>
-                        
-                        <div class="space-y-3">
-                            <input type="text" id="dev-pin" placeholder="Developer User ID (DEV-001)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
-                            <input type="password" id="dev-pass" placeholder="Password / Secret Key" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        </div>
-
-                        <div class="pt-2 border-t border-slate-800 space-y-2 text-center">
-                            <p class="text-[11px] text-slate-300 font-semibold">3x3 Dot-Pattern Verification (Draw 'N'):</p>
-                            <p class="text-[9px] text-slate-400">Sequence: Bottom-Left -> Top-Left -> Middle-Right -> Bottom-Right -> Top-Right</p>
-                            <div class="grid grid-cols-3 gap-3 max-w-[200px] mx-auto py-2">
-                                <div class="dot-node" onclick="toggleDot(1, this)" data-id="1">1</div>
-                                <div class="dot-node" onclick="toggleDot(2, this)" data-id="2">2</div>
-                                <div class="dot-node" onclick="toggleDot(3, this)" data-id="3">3</div>
-                                <div class="dot-node" onclick="toggleDot(4, this)" data-id="4">4</div>
-                                <div class="dot-node" onclick="toggleDot(5, this)" data-id="5">5</div>
-                                <div class="dot-node" onclick="toggleDot(6, this)" data-id="6">6</div>
-                                <div class="dot-node" onclick="toggleDot(7, this)" data-id="7">7</div>
-                                <div class="dot-node" onclick="toggleDot(8, this)" data-id="8">8</div>
-                                <div class="dot-node" onclick="toggleDot(9, this)" data-id="9">9</div>
-                            </div>
-                        </div>
-
-                        <button onclick="window.verifyDeveloperLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Verify & Access Panel</button>
+                        <h3 class="text-base font-bold text-white">Developer Login</h3>
+                        <input type="text" id="dev-pin" placeholder="Developer PIN (DEV-001)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
+                        <input type="password" id="dev-pass" placeholder="Secret Passcode (1029)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <button onclick="window.verifyDeveloperLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Access</button>
                     </div>
                 </div>
             `;
         };
 
-        window.toggleDot = function(num, el) {
-            if(!dotPatternSequence.includes(num)) {
-                dotPatternSequence.push(num);
-                el.classList.add('active');
-            }
-        };
-
         window.verifyDeveloperLogin = function() {
             const pin = document.getElementById('dev-pin').value.trim().toUpperCase();
             const pass = document.getElementById('dev-pass').value;
-            // Expected 'N' pattern sequence: 7 (bottom-left) -> 4 -> 1 (top-left) -> 5 (center) -> 8 -> 9 (bottom-right) -> 6 -> 3 (top-right)
-            const expectedPattern = [7, 4, 1, 5, 9, 6, 3];
-            const isPatternValid = JSON.stringify(dotPatternSequence) === JSON.stringify(expectedPattern);
-
-            if(authorizedDevelopers.includes(pin) && pass === '1029' && isPatternValid) {
-                currentUser = { role: 'developer', name: 'Lead System Developer', pin: pin };
+            if(authorizedDevelopers.includes(pin) && pass === '1029') {
+                currentUser = { role: 'developer', name: 'DVP Developer', pin: pin };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
-            } else {
-                alert('Verification failed! Check your ID, password, or 3x3 dot pattern for letter "N".');
-            }
+            } else alert('Unauthorized developer credentials.');
         };
 
         window.closeModal = function() { document.getElementById('modal-container').innerHTML = ''; };
         window.logout = function() { currentUser = null; localStorage.removeItem('nss_current_user'); renderUI(); };
         
-        // Requirement 3: Clean Tabular Format Attendance Report Downloads
         window.downloadReport = function(type) {
             let csv = "S.No | PIN Number | Student Full Name | Department Branch | Academic Year | Total Service Hours\n";
             csv += "------------------------------------------------------------------------------------------\n";

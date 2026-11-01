@@ -27,9 +27,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #050b14; color: #f8fafc; overflow-x: hidden; }
-        .glass-box { background: rgba(15, 28, 51, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
-        .glass-box:hover { border-color: rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
-        .glass-box-active { background: rgba(30, 58, 138, 0.3); border: 1px solid rgba(59, 130, 246, 0.6); }
+        .glass-box { background: rgba(15, 28, 51, 0.82); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass-box:hover { border-color: rgba(59, 130, 246, 0.3); }
         @keyframes floatPulse {
             0%, 100% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-6px) scale(1.02); }
@@ -40,10 +39,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .fade-in { animation: fadeIn 0.4s ease forwards; }
+        .dot-node { width: 36px; height: 36px; border-radius: 50%; background: #1e293b; border: 2px solid #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 11px; color: #94a3b8; }
+        .dot-node.active { background: #3b82f6; border-color: #60a5fa; color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
 <body class="min-h-screen pb-24 relative">
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col justify-between p-4 fade-in">
+    <div id="app" class="max-w-md md:max-w-xl lg:max-w-3xl mx-auto min-h-screen flex flex-col justify-between p-4 md:p-6 fade-in">
         
         <!-- Top Header -->
         <header class="flex justify-between items-center py-3 border-b border-slate-800/80 mb-4">
@@ -52,7 +53,7 @@
                     <i class="fa-solid fa-shield-halved text-white text-sm"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-xs tracking-wide text-white">NSS UNIT JNGP</h1>
+                    <h1 class="font-bold text-xs md:text-sm tracking-wide text-white">NSS UNIT JNGP</h1>
                     <p class="text-[10px] text-slate-400" id="header-subtitle">Govt Polytechnic Ramanthapur</p>
                 </div>
             </div>
@@ -63,7 +64,7 @@
         <main id="main-container" class="flex-1 space-y-4 pb-16"></main>
 
         <!-- Bottom Navigation Bar -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#071120]/95 backdrop-blur-md border-t border-slate-800/80 flex justify-around py-3 px-2 z-30 shadow-2xl">
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-xl lg:max-w-3xl mx-auto bg-[#071120]/95 backdrop-blur-md border-t border-slate-800/80 flex justify-around py-3 px-2 z-30 shadow-2xl">
             <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-500 text-xs font-semibold cursor-pointer transition hover:text-blue-400">
                 <i class="fa-solid fa-house text-lg mb-0.5"></i> Home
             </button>
@@ -102,18 +103,24 @@
 
         let currentUser = JSON.parse(localStorage.getItem('nss_current_user')) || null;
         let students = [];
+        let boardMembers = [];
         let messages = [];
         let events = [];
         let gallery = [];
         let suggestions = [];
+        let auditLogs = [];
         let currentTab = 'home';
         let currentSubView = null; 
         let selectedBranch = 'CIVIL';
-        const authorizedDevelopers = ["DEV-001", "DEV-002", "DEV-003"];
+        const authorizedDevelopers = ["DEV-001", "DEV-002"];
 
         function initSync() {
             onSnapshot(collection(db, "students"), snap => {
                 students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderUI();
+            });
+            onSnapshot(collection(db, "board_members"), snap => {
+                boardMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderUI();
             });
             onSnapshot(collection(db, "messages"), snap => {
@@ -130,6 +137,10 @@
             });
             onSnapshot(collection(db, "suggestions"), snap => {
                 suggestions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderUI();
+            });
+            onSnapshot(collection(db, "audit_logs"), snap => {
+                auditLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderUI();
             });
         }
@@ -185,7 +196,7 @@
         function renderHome(container) {
             if (!currentUser) {
                 container.innerHTML = `
-                    <div class="glass-box p-6 rounded-3xl space-y-6 shadow-2xl text-center fade-in">
+                    <div class="glass-box p-6 md:p-8 rounded-3xl space-y-6 shadow-2xl text-center fade-in max-w-lg mx-auto w-full">
                         <div class="flex justify-center pt-2">
                             <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/20 welcome-anim">
                                 <i class="fa-solid fa-hands-holding-child text-3xl text-white"></i>
@@ -193,10 +204,10 @@
                         </div>
                         <div class="space-y-2">
                             <span class="text-[10px] bg-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full font-semibold tracking-wider uppercase border border-blue-400/30">"NOT ME, BUT YOU"</span>
-                            <h2 class="text-2xl font-bold tracking-wide text-white pt-1">NSS UNIT JNGP</h2>
+                            <h2 class="text-2xl md:text-3xl font-bold tracking-wide text-white pt-1">NSS UNIT JNGP</h2>
                             <p class="text-xs text-slate-400">Govt Polytechnic College, Ramanthapur</p>
                         </div>
-                        <p class="text-xs text-slate-300 leading-relaxed px-2">
+                        <p class="text-xs md:text-sm text-slate-300 leading-relaxed px-2">
                             Autonomous volunteer management system logging 240 service hours, departmental attendance tracking, and official certifications.
                         </p>
                         <div class="space-y-3 pt-2">
@@ -208,6 +219,35 @@
                                 <div class="flex items-center gap-3"><i class="fa-solid fa-graduation-cap text-lg text-purple-400"></i> <span class="text-sm">Student Sign In</span></div>
                                 <i class="fa-solid fa-arrow-right"></i>
                             </button>
+                            <button onclick="openDeveloperLoginModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold py-3 px-6 rounded-2xl shadow-lg transition flex items-center justify-between cursor-pointer border border-slate-800">
+                                <div class="flex items-center gap-3"><i class="fa-solid fa-code text-lg text-emerald-400"></i> <span class="text-sm">Developer Control Panel</span></div>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (currentUser.role === 'developer') {
+                container.innerHTML = `
+                    <div class="glass-box p-5 md:p-6 rounded-3xl space-y-4 fade-in">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                            <div>
+                                <p class="text-xs text-emerald-400 font-semibold">Developer Control Center</p>
+                                <h2 class="text-xl font-bold text-white">${currentUser.name} (${currentUser.pin})</h2>
+                            </div>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">Active Admin</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-box p-4 rounded-2xl space-y-2">
+                                <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-users-gear text-blue-400"></i> Board Members Management</h3>
+                                <p class="text-[10px] text-slate-400">Manage, review, or suspend board member accounts.</p>
+                                <button onclick="openSubView('manage-board')" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 py-2 rounded-xl text-xs font-semibold border border-blue-500/30 transition">Manage Board</button>
+                            </div>
+                            <div class="glass-box p-4 rounded-2xl space-y-2">
+                                <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> System Audit Logs</h3>
+                                <p class="text-[10px] text-slate-400">Monitor all attendance modifications and actions.</p>
+                                <button onclick="openSubView('audit-logs')" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 py-2 rounded-xl text-xs font-semibold border border-amber-500/30 transition">View Audit Logs</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -243,7 +283,7 @@
                     </div>
 
                     <div class="glass-box p-5 rounded-3xl space-y-3 fade-in">
-                        <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-table text-emerald-400"></i> Attendance Reports & Table Downloads</h3>
+                        <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-table text-emerald-400"></i> Structured Tabular Attendance Reports</h3>
                         <div class="grid grid-cols-3 gap-2">
                             <button onclick="window.downloadReport('session')" class="glass-box p-2.5 rounded-xl text-[10px] font-semibold text-blue-300 hover:bg-blue-600/20 transition cursor-pointer">Session Table</button>
                             <button onclick="window.downloadReport('event')" class="glass-box p-2.5 rounded-xl text-[10px] font-semibold text-purple-300 hover:bg-purple-600/20 transition cursor-pointer">Event Table</button>
@@ -258,7 +298,8 @@
                 let sessionHours = sessionCount * 3;
                 let eventHours = userEvents.reduce((acc, ev) => acc + (ev.hours || 3), 0);
                 let combinedTotalHours = sessionHours + eventHours;
-                let combinedPct = Math.round((combinedTotalHours / 240) * 100);
+                let remainingHours = Math.max(0, 240 - combinedTotalHours);
+                let combinedPct = Math.min(100, Math.round((combinedTotalHours / 240) * 100));
                 let isEligible = combinedTotalHours >= 240;
 
                 container.innerHTML = `
@@ -275,18 +316,27 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-xs ${isEligible ? 'text-emerald-300' : 'text-amber-300'}">${isEligible ? 'Certificate Eligible! 🎉' : 'In Progress (Target: 240 Hrs)'}</h4>
-                                <p class="text-[10px] text-slate-400">${isEligible ? 'Completed 240-hour requirement!' : `${240 - combinedTotalHours} hours remaining.`}</p>
+                                <p class="text-[10px] text-slate-400">${isEligible ? 'Completed 240-hour requirement!' : `${remainingHours} hours remaining.`}</p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Requirement 4: 240-Hour Progress Dashboard with Visual Pie/Percentage Chart -->
                     <div class="glass-box p-5 rounded-3xl space-y-4 border border-blue-500/30 fade-in">
                         <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-hourglass-half text-blue-400 mr-1"></i> 240-Hour Goal</h3>
-                            <span class="text-xs font-bold text-blue-400">${combinedTotalHours} / 240 Hrs</span>
+                            <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-blue-400 mr-1"></i> 240-Hour Progress Chart</h3>
+                            <span class="text-xs font-bold text-blue-400">${combinedTotalHours} / 240 Hrs (${combinedPct}%)</span>
                         </div>
-                        <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-700" style="width: ${Math.min(100, combinedPct)}%"></div>
+                        
+                        <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Completed</p><p class="text-base font-bold text-emerald-400 mt-1">${combinedTotalHours}h</p></div>
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Remaining</p><p class="text-base font-bold text-amber-400 mt-1">${remainingHours}h</p></div>
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800"><p class="text-[10px] text-slate-400">Percentage</p><p class="text-base font-bold text-blue-400 mt-1">${combinedPct}%</p></div>
+                        </div>
+
+                        <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5 flex">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-l-full transition-all duration-700" style="width: ${combinedPct}%"></div>
+                            <div class="bg-slate-800 h-full rounded-r-full" style="width: ${100 - combinedPct}%"></div>
                         </div>
                     </div>
 
@@ -364,7 +414,7 @@
                         </div>
                         <div class="space-y-3">
                             <input type="text" id="reg-name" placeholder="Full Name" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                            <input type="text" id="reg-pin" placeholder="PIN Number" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
+                            <input type="text" id="reg-pin" placeholder="PIN Number (e.g. 25002)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
                             <select id="reg-branch" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                                 ${['CIVIL', 'MECH', 'EEE', 'ECE', 'CHEM', 'MET', 'PKG', 'AME'].map(b => `<option value="${b}">${b}</option>`).join('')}
                             </select>
@@ -383,6 +433,43 @@
                             <input type="text" id="notice-title" placeholder="Notice Title" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
                             <textarea id="notice-content" rows="4" placeholder="Announcement content..." class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"></textarea>
                             <button onclick="window.broadcastNoticeAction()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Publish Broadcast</button>
+                        </div>
+                    </div>
+                `;
+            } else if (currentSubView === 'manage-board') {
+                container.innerHTML = `
+                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
+                        <div class="flex items-center gap-3">
+                            <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
+                            <div><h3 class="font-bold text-sm text-white">Manage Board Members</h3><p class="text-[10px] text-slate-400">Developer Control Panel</p></div>
+                        </div>
+                        <div class="space-y-2 max-h-72 overflow-y-auto">
+                            ${boardMembers.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No registered board members.</p>' : boardMembers.map(bm => `
+                                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                                    <div>
+                                        <p class="font-bold text-white">${bm.name}</p>
+                                        <p class="text-[10px] text-slate-400">PIN: ${bm.pin} • ${bm.designation}</p>
+                                    </div>
+                                    <button onclick="window.removeBoardMember('${bm.pin}')" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 px-3 py-1 rounded-lg text-[10px]">Remove</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentSubView === 'audit-logs') {
+                container.innerHTML = `
+                    <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
+                        <div class="flex items-center gap-3">
+                            <button onclick="closeSubView()" class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
+                            <div><h3 class="font-bold text-sm text-white">System Audit Logs</h3><p class="text-[10px] text-slate-400">Developer Tracking</p></div>
+                        </div>
+                        <div class="space-y-2 max-h-72 overflow-y-auto">
+                            ${auditLogs.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No audit activity recorded.</p>' : auditLogs.map(l => `
+                                <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-[10px] space-y-0.5">
+                                    <p class="font-semibold text-white">${l.action} by ${l.user}</p>
+                                    <p class="text-slate-400">${l.details} • ${l.timestamp}</p>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `;
@@ -424,9 +511,10 @@
                     att[`${date} (${title})`] = sel ? sel.value : 'Present';
                     await updateDoc(doc(db, "students", s.pin), { attendance: att });
                 }
+                await addDoc(collection(db, "audit_logs"), { action: "Marked Session Attendance", user: currentUser.name, details: `Branch: ${selectedBranch}, Date: ${date}`, timestamp: new Date().toLocaleString() });
                 alert('Attendance successfully recorded!');
                 closeSubView();
-            } catch(e) { alert('Failed.'); }
+            } catch(e) { alert('Failed to record attendance.'); }
         };
 
         window.registerStudentAction = async function() {
@@ -436,9 +524,9 @@
             if(!name || !pin) return alert('Enter name and PIN.');
             try {
                 await setDoc(doc(db, "students", pin), { name, pin, branch, year: '2nd Year', attendance: {}, eventsAttended: [] });
-                alert('Student registered!');
+                alert('Student registered successfully!');
                 closeSubView();
-            } catch(e) { alert('Failed.'); }
+            } catch(e) { alert('Failed to register student.'); }
         };
 
         window.broadcastNoticeAction = async function() {
@@ -448,9 +536,18 @@
             try {
                 const sender = currentUser ? `${currentUser.name} (${currentUser.designation || 'Board Member'})` : 'Board';
                 await addDoc(collection(db, "messages"), { title, content, sender, date: new Date().toISOString().split('T')[0] });
-                alert('Notice broadcasted!');
+                alert('Notice broadcasted successfully!');
                 closeSubView();
-            } catch(e) { alert('Failed.'); }
+            } catch(e) { alert('Failed to broadcast notice.'); }
+        };
+
+        window.removeBoardMember = async function(pin) {
+            if(confirm(`Remove board member account ${pin}?`)) {
+                try {
+                    await deleteDoc(doc(db, "board_members", pin));
+                    alert('Board member removed.');
+                } catch(e) { alert('Action failed.'); }
+            }
         };
 
         function renderEvents(container) {
@@ -458,7 +555,7 @@
                 <div class="glass-box p-5 rounded-3xl space-y-4 fade-in">
                     <h2 class="text-base font-bold text-white"><i class="fa-solid fa-calendar-days text-purple-400 mr-2"></i> Upcoming Events</h2>
                     <div class="space-y-3">
-                        ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events.</p>' : events.map(e => `
+                        ${events.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No events scheduled.</p>' : events.map(e => `
                             <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="flex justify-between items-center"><h3 class="font-bold text-xs text-white">${e.name}</h3><span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">${e.date}</span></div>
                                 <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${e.venue}</p>
@@ -500,7 +597,7 @@
                         ${currentUser && currentUser.role === 'student' ? `<button onclick="window.openSuggestionModal()" class="bg-purple-600/30 text-purple-300 text-[10px] px-2.5 py-1 rounded-lg">Suggestion Box</button>` : ''}
                     </div>
                     <div class="space-y-3">
-                        ${messages.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No notices.</p>' : messages.map(m => `
+                        ${messages.length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">No active notices.</p>' : messages.map(m => `
                             <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
                                 <div class="flex justify-between items-center"><h3 class="font-bold text-xs text-white">${m.title}</h3><span class="text-[10px] text-slate-500">${m.date}</span></div>
                                 <p class="text-xs text-slate-300">${m.content}</p>
@@ -534,7 +631,7 @@
             const content = document.getElementById('sug-content').value.trim();
             if(!title || !content) return alert('Fill fields.');
             await addDoc(collection(db, "suggestions"), { title, content, studentName: currentUser.name });
-            alert('Suggestion submitted!'); closeModal();
+            alert('Suggestion submitted successfully!'); closeModal();
         };
 
         function renderProfile(container) {
@@ -551,20 +648,44 @@
             `;
         }
 
+        // Requirement 10: Persistent Board Member Registration & Login Flow
         window.openBoardLoginModal = function() {
             document.getElementById('modal-container').innerHTML = `
                 <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
                     <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-slate-700 shadow-2xl">
                         <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                        <h3 class="text-base font-bold text-white">Board Executive Access</h3>
-                        <input type="password" id="login-passcode" placeholder="Enter Secret Passcode" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        <input type="text" id="login-name" placeholder="Board Member Full Name" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        <input type="text" id="login-pin" placeholder="Board Member PIN" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        <input type="text" id="login-desig" placeholder="Official Designation" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        <button onclick="window.verifyBoardLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Verify & Continue</button>
+                        <h3 class="text-base font-bold text-white">Board Member Portal</h3>
+                        <p class="text-xs text-slate-400">Enter your permanent PIN to log in or register once.</p>
+                        <input type="text" id="board-login-pin" placeholder="Enter PIN (e.g. 25500)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
+                        <input type="text" id="board-login-name" placeholder="Full Name (for new registration)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <input type="text" id="board-login-desig" placeholder="Designation (e.g. ECE 26)" class="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        <button onclick="window.verifyOrRegisterBoard()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Login / Register</button>
                     </div>
                 </div>
             `;
+        };
+
+        window.verifyOrRegisterBoard = async function() {
+            const pin = document.getElementById('board-login-pin').value.trim().toUpperCase();
+            const name = document.getElementById('board-login-name').value.trim();
+            const desig = document.getElementById('board-login-desig').value.trim();
+            if(!pin) return alert('Please enter your PIN.');
+
+            const docRef = doc(db, "board_members", pin);
+            const snap = await getDoc(docRef);
+
+            if(snap.exists()) {
+                currentUser = { role: 'board', ...snap.data() };
+                localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+                closeModal(); renderUI();
+            } else {
+                if(!name) return alert('Name is required for first-time registration.');
+                const newBoard = { name, pin, designation: desig || 'Board Executive', role: 'board' };
+                await setDoc(docRef, newBoard);
+                currentUser = newBoard;
+                localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
+                closeModal(); renderUI();
+            }
         };
 
         window.openStudentLoginModal = function() {
@@ -580,32 +701,6 @@
             `;
         };
 
-        window.openDeveloperLoginModal = function() {
-            document.getElementById('modal-container').innerHTML = `
-                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
-                    <div class="glass-box w-full max-w-sm rounded-3xl p-6 space-y-4 relative border border-emerald-500/40 shadow-2xl">
-                        <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                        <h3 class="text-base font-bold text-white">Developer Login</h3>
-                        <input type="text" id="dev-pin" placeholder="Developer PIN (DEV-001)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
-                        <input type="password" id="dev-pass" placeholder="Enter Secret Key" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
-                        <button onclick="window.verifyDeveloperLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Access</button>
-                    </div>
-                </div>
-            `;
-        };
-
-        window.verifyBoardLogin = function() {
-            const pass = document.getElementById('login-passcode').value;
-            const name = document.getElementById('login-name').value.trim();
-            const pin = document.getElementById('login-pin').value.trim();
-            const desig = document.getElementById('login-desig').value.trim();
-            if (pass === '1029' && name && pin) {
-                currentUser = { role: 'board', name: name, pin: pin, designation: desig || 'Board Executive' };
-                localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
-                closeModal(); renderUI();
-            } else alert('Please fill in valid passcode, name, and PIN!');
-        };
-
         window.verifyStudentLogin = async function() {
             const pin = document.getElementById('student-login-pin').value.trim().toUpperCase();
             const snap = await getDoc(doc(db, "students", pin));
@@ -613,32 +708,84 @@
                 currentUser = { role: 'student', ...snap.data() };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
-            } else alert('Student PIN not found.');
+            } else alert('Student PIN not found in database.');
+        };
+
+        // Requirement 6: Developer Login with 3x3 Dot-Pattern Verification
+        let dotPatternSequence = [];
+        window.openDeveloperLoginModal = function() {
+            dotPatternSequence = [];
+            document.getElementById('modal-container').innerHTML = `
+                <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
+                    <div class="glass-box w-full max-w-md rounded-3xl p-6 space-y-4 relative border border-emerald-500/40 shadow-2xl">
+                        <button onclick="window.closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                        <h3 class="text-base font-bold text-white">Developer Secure Login</h3>
+                        <p class="text-xs text-slate-400">Step 1: Enter ID & Password | Step 2: Complete 'N' Dot Pattern</p>
+                        
+                        <div class="space-y-3">
+                            <input type="text" id="dev-pin" placeholder="Developer User ID (DEV-001)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white uppercase">
+                            <input type="password" id="dev-pass" placeholder="Password / Secret Key" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white">
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-800 space-y-2 text-center">
+                            <p class="text-[11px] text-slate-300 font-semibold">3x3 Dot-Pattern Verification (Draw 'N'):</p>
+                            <p class="text-[9px] text-slate-400">Sequence: Bottom-Left -> Top-Left -> Middle-Right -> Bottom-Right -> Top-Right</p>
+                            <div class="grid grid-cols-3 gap-3 max-w-[200px] mx-auto py-2">
+                                <div class="dot-node" onclick="toggleDot(1, this)" data-id="1">1</div>
+                                <div class="dot-node" onclick="toggleDot(2, this)" data-id="2">2</div>
+                                <div class="dot-node" onclick="toggleDot(3, this)" data-id="3">3</div>
+                                <div class="dot-node" onclick="toggleDot(4, this)" data-id="4">4</div>
+                                <div class="dot-node" onclick="toggleDot(5, this)" data-id="5">5</div>
+                                <div class="dot-node" onclick="toggleDot(6, this)" data-id="6">6</div>
+                                <div class="dot-node" onclick="toggleDot(7, this)" data-id="7">7</div>
+                                <div class="dot-node" onclick="toggleDot(8, this)" data-id="8">8</div>
+                                <div class="dot-node" onclick="toggleDot(9, this)" data-id="9">9</div>
+                            </div>
+                        </div>
+
+                        <button onclick="window.verifyDeveloperLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition cursor-pointer">Verify & Access Panel</button>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.toggleDot = function(num, el) {
+            if(!dotPatternSequence.includes(num)) {
+                dotPatternSequence.push(num);
+                el.classList.add('active');
+            }
         };
 
         window.verifyDeveloperLogin = function() {
             const pin = document.getElementById('dev-pin').value.trim().toUpperCase();
             const pass = document.getElementById('dev-pass').value;
-            if(authorizedDevelopers.includes(pin) && pass === '1029') {
+            // Expected 'N' pattern sequence: 7 (bottom-left) -> 4 -> 1 (top-left) -> 5 (center) -> 8 -> 9 (bottom-right) -> 6 -> 3 (top-right)
+            const expectedPattern = [7, 4, 1, 5, 9, 6, 3];
+            const isPatternValid = JSON.stringify(dotPatternSequence) === JSON.stringify(expectedPattern);
+
+            if(authorizedDevelopers.includes(pin) && pass === '1029' && isPatternValid) {
                 currentUser = { role: 'developer', name: 'Lead System Developer', pin: pin };
                 localStorage.setItem('nss_current_user', JSON.stringify(currentUser));
                 closeModal(); renderUI();
-            } else alert('Unauthorized.');
+            } else {
+                alert('Verification failed! Check your ID, password, or 3x3 dot pattern for letter "N".');
+            }
         };
 
         window.closeModal = function() { document.getElementById('modal-container').innerHTML = ''; };
         window.logout = function() { currentUser = null; localStorage.removeItem('nss_current_user'); renderUI(); };
         
+        // Requirement 3: Clean Tabular Format Attendance Report Downloads
         window.downloadReport = function(type) {
-            let csv = "PIN | Student Name | Branch | Total Hours\n";
-            csv += "----------------------------------------\n";
-            students.forEach(s => {
+            let csv = "S.No | PIN Number | Student Full Name | Department Branch | Academic Year | Total Service Hours\n";
+            csv += "------------------------------------------------------------------------------------------\n";
+            students.forEach((s, index) => {
                 let h = (s.attendance ? Object.values(s.attendance).filter(v => v === 'Present').length * 3 : 0) + (s.eventsAttended ? s.eventsAttended.reduce((a,b)=>a+(b.hours||3),0) : 0);
-                csv += `${s.pin} | ${s.name} | ${s.branch} | ${h} Hrs\n`;
+                csv += `${index + 1} | ${s.pin} | ${s.name} | ${s.branch} | ${s.year || '2nd Year'} | ${h} Hrs\n`;
             });
             const link = document.createElement("a");
             link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = `NSS_${type}_attendance_table_report.csv`;
+            link.download = `NSS_${type}_tabular_attendance_report.csv`;
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
         };
     </script>
